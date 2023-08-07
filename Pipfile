@@ -7,6 +7,8 @@ name = "pypi"
 kubernetes = "*"
 flask = "*"
 flask-restful = "*"
+sqlalchemy = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
