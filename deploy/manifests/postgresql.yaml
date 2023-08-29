@@ -27,13 +27,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    app: postgresql
   name: postgresql
   namespace: boa
 spec:
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
   selector:
     app: postgresql
-  ports:
-  - name: postgresql
-    protocol: TCP
-    port: 5432
-    targetPort: postgresql
+  type: ClusterIP
