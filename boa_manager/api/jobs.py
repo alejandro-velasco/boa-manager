@@ -33,6 +33,25 @@ class OrganizationApi(Resource):
 
         return args, 201
     
+    def get(self):
+        # Parse Arguments
+        parser = reqparse.RequestParser()
+        parser.add_argument('name')
+        args = parser.parse_args()
+
+        # Get Organization Table in the Database
+        db = Database()
+        org = Organization()
+
+        # Get Organization Id
+        org_id = org.query.filter(Organization.name == args.name).one().id
+        resp = {
+            "name": args.name,
+            "id": str(org_id)
+        }
+
+        return resp, 200
+    
 class ClusterApi(Resource):
     def post(self):
         # Parse Arguments
@@ -57,6 +76,25 @@ class ClusterApi(Resource):
         db.session.commit()
 
         return args, 201
+
+    def get(self):
+        # Parse Arguments
+        parser = reqparse.RequestParser()
+        parser.add_argument('name')
+        args = parser.parse_args()
+
+        # Get Cluster Table in the Database
+        db = Database()
+        cluster = Cluster()
+
+        # Get Cluster Id
+        cluster_id = cluster.query.filter(Cluster.name == args.name).one().id
+        resp = {
+            "name": args.name,
+            "id": str(cluster_id)
+        }
+
+        return resp, 200    
     
 class JobApi(Resource):
     def post(self):
@@ -80,3 +118,25 @@ class JobApi(Resource):
         db.session.commit()
 
         return args, 201
+    
+    def get(self):
+        # Parse Arguments
+        parser = reqparse.RequestParser()
+        parser.add_argument('name')
+        parser.add_argument('organization_id')
+        args = parser.parse_args()
+
+        # Get Job Table in the Database
+        db = Database()
+        job = Job()
+
+        # Get Job Id
+        job_id = job.query.filter(Job.name == args.name,
+                                  Job.organization_id == args.organization_id).one().id
+        resp = {
+            "name": args.name,
+            "organization_id": args.organization_id,
+            "job_id": str(job_id)
+        }
+
+        return resp, 200    
