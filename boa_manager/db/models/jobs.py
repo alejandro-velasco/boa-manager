@@ -39,7 +39,10 @@ class Job(Base):
 class OrganizationUniqueIndex():
     def __init__(self, id: int, engine: Engine) -> None:
         self.id = id
-        self.index = Index(f'unique_org_jobs_{self.id}', Job.name, unique=True, postgresql_where=Job.organization_id == self.id)
+        self.index = Index(f'unique_org_jobs_{self.id}', 
+                           Job.name, 
+                           unique=True, 
+                           postgresql_where=Job.organization_id == self.id)
         self.engine = engine
 
     def create(self):
