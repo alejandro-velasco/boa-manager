@@ -12,9 +12,14 @@ class JobApi(Resource):
     def post(self):
         # Parse Arguments
         parser = reqparse.RequestParser()
-        parser.add_argument('name')
-        parser.add_argument('organization_id')
-        parser.add_argument('cluster_id')
+        parser.add_argument('name', required=True)
+        parser.add_argument('organization_id', required=True)
+        parser.add_argument('image', required=True)
+        parser.add_argument('cluster_id', required=True)
+        parser.add_argument('repo_url', required=True)
+        parser.add_argument('branch', required=False)
+        parser.add_argument('file_path', required=False)
+        parser.add_argument('log_level', required=False)
         args = parser.parse_args()
 
         # Create Job in the Database
@@ -23,6 +28,11 @@ class JobApi(Resource):
             name=args.name,
             organization_id=args.organization_id,
             cluster_id=args.cluster_id,
+            repo_url=args.repo_url,
+            branch=args.branch,
+            file_path=args.file_path,
+            image=args.image,
+            log_level=args.log_level
         )
 
         # Commit to Database
@@ -60,10 +70,10 @@ class JobExecutionApi(Resource):
         # Get Cluster / Job table in the Database
         db = Database()
 
-        # Get Cluster Information
-        cluster_id = Job.query.filter(Job.name == args.name,
-                                      Job.organization_id == args.organization_id).one().cluster_id
-        cluster_query = Cluster.query.filter(Cluster.id == cluster_id).one()
+        # Query Cluster and Job tables
+        job_query = Job.query.filter(Job.name == args.name,
+                                      Job.organization_id == args.organization_id).one()
+        cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
         
         pod_id = ''.join(random.choices(string.ascii_lowercase +
                                      string.digits, k=10))
@@ -85,8 +95,8 @@ class JobExecutionApi(Resource):
 
             client.create_pod(
                 name=f'{args.name}-{pod_id}',
-                image="boa-client:test",
-                url="https://github.com/alejandro-velasco/boa-test-repo.git"
+                image=job_query.image,
+                url=job_query.repo_url
             )
                 
         finally:
