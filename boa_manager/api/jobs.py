@@ -4,7 +4,8 @@ import base64
 import tempfile
 from flask_restful import reqparse, Resource
 from boa_manager.db.database import Database
-from boa_manager.db.models.jobs import Job, Cluster
+from boa_manager.db.models.jobs import Job
+from boa_manager.db.models.clusters import Cluster
 from boa_manager.api.kubernetes import BoaK8SClient
 
 class JobApi(Resource):

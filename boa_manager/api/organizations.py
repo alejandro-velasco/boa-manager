@@ -1,6 +1,6 @@
 from flask_restful import reqparse, Resource
 from boa_manager.db.database import Database
-from boa_manager.db.models.jobs import (
+from boa_manager.db.models.organizations import (
     Organization,
     OrganizationUniqueIndex
 )

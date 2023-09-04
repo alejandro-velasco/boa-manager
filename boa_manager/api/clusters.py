@@ -1,6 +1,6 @@
 from flask_restful import reqparse, Resource
 from boa_manager.db.database import Database
-from boa_manager.db.models.jobs import Cluster
+from boa_manager.db.models.clusters import Cluster
 
 class ClusterApi(Resource):
     def post(self):
