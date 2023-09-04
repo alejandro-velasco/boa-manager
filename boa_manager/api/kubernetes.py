@@ -18,15 +18,13 @@ The example covers the following:
     - update/patch to perform rolling restart on the deployment
     - deletetion of the deployment
 """
-
-import datetime
 import logging
-from kubernetes import client, config
+from kubernetes import client
 from kubernetes.client.rest import ApiException
 
 class BoaK8SClient:
     def __init__(self, ca="", server="https://127.0.0.1:6443", token=""):
-        self.api = self._configure_client(ca, server, token)
+        self.api = self._configure_client(ca=ca, server=server, token=token)
 
     def _configure_client(self, ca, server, token):
 
@@ -35,7 +33,7 @@ class BoaK8SClient:
 
             try:
                 with open('/var/run/secrets/kubernetes.io/serviceaccount/token') as f:
-                    token = f
+                    token = f.read().rstrip()
             except FileNotFoundError as fnfe:
                 logging.error('Serviceaccount Token is not mounted.')
                 return None, 404
@@ -48,7 +46,7 @@ class BoaK8SClient:
 
             try:
                 with open('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt') as f:
-                    ca = f
+                    ca = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
             except FileNotFoundError as fnfe:
                 logging.error('Serviceaccount ca.crt is not mounted.')
                 return None, 404
@@ -61,25 +59,33 @@ class BoaK8SClient:
         configuration.api_key_prefix['authorization'] = 'Bearer'
         configuration.host = server
         configuration.ssl_ca_cert = ca
-
         return client.CoreV1Api(client.ApiClient(configuration))
 
     def create_pod(self, 
                    name,  
                    image,
                    url,
-                   namespace='boa',
+                   branch='',
                    submodules=False,
-                   branch='master',
-                   file='boa.yaml'):
+                   file='',
+                   namespace='boa'):
         
         submodules_flag = ""
+        branch_flag = ""
+        name_flag = ""
+        file_flag = ""
 
         if submodules:
             submodules_flag = "--submodules"
-        else:
-            submodules_flag = "--no-submodules"
 
+        if branch:
+            branch_flag = f"--branch {branch}"
+        
+        if name:
+            name_flag = f"--name {name}"
+        
+        if file:
+            file_flag = f"--file {file}"
 
         body = {
             'apiVersion': 'v1',
@@ -88,13 +94,16 @@ class BoaK8SClient:
                 'name': name
             },
             'spec': {
-                'containers': [{
-                    'image': image,
-                    'name': "boa-client",
-                    'args': [
-                        f"--repository {url} {submodules_flag} --branch {branch} --name {name} --file {file}"
-                    ]
-                }]
+                'restartPolicy': 'Never',
+                'containers': [
+                    {
+                        'image': image,
+                        'name': "boa-client",
+                        'args': [
+                            f"--repository {url} {submodules_flag} {branch_flag} {name_flag} {file_flag}"
+                        ]
+                    }
+                ]
             }
         }
     
@@ -102,10 +111,8 @@ class BoaK8SClient:
         resp = self.api.create_namespaced_pod(
             body=body, namespace=namespace
         )
-    
+
         logging.info(f"pod `{resp.metadata.name}` created.")
-        logging.info(f"NAMESPACE\tNAME\t\t\tREVISION\tIMAGE")
-        logging.info(f"{resp.metadata.namespace}\t\t{resp.metadata.name}\t{resp.metadata.generation}\t\t{resp.spec.containers[0].image}")
     
     def delete_pod(self, name, namespace):
         # Delete deployment

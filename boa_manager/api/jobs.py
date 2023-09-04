@@ -1,101 +1,12 @@
-from flask import Flask
-from flask_restful import reqparse, abort, Api, Resource
+import random
+import string
+import base64
+import tempfile
+from flask_restful import reqparse, Resource
 from boa_manager.db.database import Database
-from boa_manager.db.models.jobs import (
-    Job,
-    Cluster,
-    Organization,
-    OrganizationUniqueIndex
-)
+from boa_manager.db.models.jobs import Job, Cluster
+from boa_manager.api.kubernetes import BoaK8SClient
 
-class OrganizationApi(Resource):
-    def post(self):
-        # Parse Arguments
-        parser = reqparse.RequestParser()
-        parser.add_argument('name')
-        args = parser.parse_args()
-
-        # Create Organization in the Database
-        db = Database()
-        org = Organization(name=args.name)
-
-        # Commit to Database
-        db.session.add(org)
-        db.session.commit()
-
-        # Create Partial Unique Constraint
-        org_id = org.query.filter(Organization.name == args.name).one().id
-        org_unique_index = OrganizationUniqueIndex(id=org_id, engine=db.engine)
-
-        # Commit to Database
-        org_unique_index.create()
-        db.session.commit()
-
-        return args, 201
-    
-    def get(self):
-        # Parse Arguments
-        parser = reqparse.RequestParser()
-        parser.add_argument('name')
-        args = parser.parse_args()
-
-        # Get Organization Table in the Database
-        db = Database()
-        org = Organization()
-
-        # Get Organization Id
-        org_id = org.query.filter(Organization.name == args.name).one().id
-        resp = {
-            "name": args.name,
-            "id": str(org_id)
-        }
-
-        return resp, 200
-    
-class ClusterApi(Resource):
-    def post(self):
-        # Parse Arguments
-        parser = reqparse.RequestParser()
-        parser.add_argument('name')
-        parser.add_argument('server_url')
-        parser.add_argument('certificate_authority')
-        parser.add_argument('token')
-        args = parser.parse_args()
-
-        # Create Cluster in the Database
-        db = Database()
-        cluster = Cluster(
-            name=args.name,
-            server_url=args.server_url,
-            certificate_authority=args.certificate_authority,
-            token=args.token
-        )
-
-        # Commit to Database
-        db.session.add(cluster)
-        db.session.commit()
-
-        return args, 201
-
-    def get(self):
-        # Parse Arguments
-        parser = reqparse.RequestParser()
-        parser.add_argument('name')
-        args = parser.parse_args()
-
-        # Get Cluster Table in the Database
-        db = Database()
-        cluster = Cluster()
-
-        # Get Cluster Id
-        cluster_id = cluster.query.filter(Cluster.name == args.name).one().id
-        resp = {
-            "name": args.name,
-            "id": str(cluster_id)
-        }
-
-        return resp, 200    
-    
 class JobApi(Resource):
     def post(self):
         # Parse Arguments
@@ -107,14 +18,14 @@ class JobApi(Resource):
 
         # Create Job in the Database
         db = Database()
-        cluster = Job(
+        job = Job(
             name=args.name,
             organization_id=args.organization_id,
             cluster_id=args.cluster_id,
         )
 
         # Commit to Database
-        db.session.add(cluster)
+        db.session.add(job)
         db.session.commit()
 
         return args, 201
@@ -126,12 +37,8 @@ class JobApi(Resource):
         parser.add_argument('organization_id')
         args = parser.parse_args()
 
-        # Get Job Table in the Database
-        db = Database()
-        job = Job()
-
         # Get Job Id
-        job_id = job.query.filter(Job.name == args.name,
+        job_id = Job.query.filter(Job.name == args.name,
                                   Job.organization_id == args.organization_id).one().id
         resp = {
             "name": args.name,
@@ -139,4 +46,49 @@ class JobApi(Resource):
             "job_id": str(job_id)
         }
 
-        return resp, 200    
+        return resp, 200
+    
+class JobExecutionApi(Resource):
+    def post(self):
+        # Parse Arguments
+        parser = reqparse.RequestParser()
+        parser.add_argument('name')
+        parser.add_argument('organization_id')
+        args = parser.parse_args()
+
+        # Get Cluster / Job table in the Database
+        db = Database()
+
+        # Get Cluster Information
+        cluster_id = Job.query.filter(Job.name == args.name,
+                                      Job.organization_id == args.organization_id).one().cluster_id
+        cluster_query = Cluster.query.filter(Cluster.id == cluster_id).one()
+        
+        pod_id = ''.join(random.choices(string.ascii_lowercase +
+                                     string.digits, k=10))
+
+        f = tempfile.NamedTemporaryFile(mode='w+')
+
+        try:
+            # Write CA Certificate to Temporary File
+            ca = base64.b64decode(cluster_query.certificate_authority).decode()
+            f.write(ca)
+            f.seek(0)
+
+            # Create K8S Client / Workload
+            client = BoaK8SClient(
+                ca = f.name,
+                server = cluster_query.server_url,
+                token = cluster_query.token
+            )
+
+            client.create_pod(
+                name=f'{args.name}-{pod_id}',
+                image="boa-client:test",
+                url="https://github.com/alejandro-velasco/boa-test-repo.git"
+            )
+                
+        finally:
+            f.close()
+
+        return 200  
