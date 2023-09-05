@@ -123,7 +123,7 @@ class JobExecutionApi(Resource):
         return 200
     
 class JobStatusApi(Resource):
-    def post(self):
+    def put(self):
         # Parse Arguments
         parser = reqparse.RequestParser()
         parser.add_argument('job_name', required=True)
