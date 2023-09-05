@@ -29,3 +29,19 @@ spec:
       - name: app
         hostPath:
           path: /run/desktop/mnt/host/c/Users/aleja/OneDrive/Documents/ci-application/boa-manager-real
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dev
+  name: dev
+  namespace: boa
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: dev
+  type: ClusterIP

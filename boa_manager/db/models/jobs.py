@@ -40,3 +40,25 @@ class Job(Base):
 
     def __repr__(self):
         return f'<job {self.name!r}>'
+    
+
+class JobExecution(Base):
+    __tablename__ = 'job_execution_history'
+    id = Column(Integer, primary_key=True)
+    organization_id = Column("organization_id", ForeignKey("organizations.id"))
+    job_id = Column("job_id", ForeignKey("jobs.id"))
+    execution_id = Column(String(50), nullable=False)
+    status = Column(String(50), nullable=False)
+
+    def __init__(self,
+                 organization_id=None,
+                 job_id=None,
+                 execution_id=None, 
+                 status=None):
+        self.organization_id = organization_id
+        self.job_id = job_id
+        self.execution_id = execution_id
+        self.status = status
+
+    def __repr__(self):
+        return f'<job execution {self.execution_id!r}>'
