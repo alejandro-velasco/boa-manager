@@ -1,10 +1,11 @@
 import os
+from waitress import serve
 from flask import Flask, request
 from flask_restful import Resource, Api
 from boa_manager.db.database import Database, init_db
 from boa_manager.api.organizations import OrganizationApi
 from boa_manager.api.clusters import ClusterApi
-from boa_manager.api.jobs import JobApi, JobExecutionApi
+from boa_manager.api.jobs import JobApi, JobExecutionApi, JobStatusApi
 
 
 def entrypoint():
@@ -16,7 +17,8 @@ def entrypoint():
     api.add_resource(ClusterApi, '/api/clusters')
     api.add_resource(JobApi, '/api/jobs')
     api.add_resource(JobExecutionApi, '/api/jobs/execute')
-    app.run(debug=True)
+    api.add_resource(JobStatusApi, '/api/jobs/status')
+    serve(app, host='0.0.0.0', port=5000)
     
 if __name__ == '__main__':
     entrypoint()

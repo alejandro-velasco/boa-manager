@@ -65,6 +65,9 @@ class BoaK8SClient:
                    name,  
                    image,
                    url,
+                   execution_id,
+                   server,
+                   organization_id,
                    branch='',
                    submodules=False,
                    file='',
@@ -81,9 +84,6 @@ class BoaK8SClient:
         if branch:
             branch_flag = f"--branch {branch}"
         
-        if name:
-            name_flag = f"--name {name}"
-        
         if file:
             file_flag = f"--file {file}"
 
@@ -91,7 +91,7 @@ class BoaK8SClient:
             'apiVersion': 'v1',
             'kind': 'Pod',
             'metadata': {
-                'name': name
+                'name': f'org-{organization_id}-job-{name}-{execution_id}'
             },
             'spec': {
                 'restartPolicy': 'Never',
@@ -100,7 +100,7 @@ class BoaK8SClient:
                         'image': image,
                         'name': "boa-client",
                         'args': [
-                            f"--repository {url} {submodules_flag} {branch_flag} {name_flag} {file_flag}"
+                            f"--url {url} --name {name} --execution {execution_id} --server {server} --organization-id {organization_id} {submodules_flag} {branch_flag} {name_flag} {file_flag}"
                         ]
                     }
                 ]
@@ -114,10 +114,10 @@ class BoaK8SClient:
 
         logging.info(f"pod `{resp.metadata.name}` created.")
     
-    def delete_pod(self, name, namespace):
+    def delete_pod(self, name, execution_id, organization_id, namespace='boa'):
         # Delete deployment
         resp = self.api.delete_namespaced_pod(
-            name=name,
+            name=f'org-{organization_id}-job-{name}-{execution_id}',
             namespace=namespace,
             body=client.V1DeleteOptions(
                 propagation_policy="Foreground", grace_period_seconds=5
