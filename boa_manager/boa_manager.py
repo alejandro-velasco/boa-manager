@@ -1,4 +1,5 @@
 import os
+from waitress import serve
 from flask import Flask, request
 from flask_restful import Resource, Api
 from boa_manager.db.database import Database, init_db
@@ -17,7 +18,7 @@ def entrypoint():
     api.add_resource(JobApi, '/api/jobs')
     api.add_resource(JobExecutionApi, '/api/jobs/execute')
     api.add_resource(JobStatusApi, '/api/jobs/status')
-    app.run(debug=True, host='0.0.0.0')
+    serve(app, host='0.0.0.0', port=5000)
     
 if __name__ == '__main__':
     entrypoint()
