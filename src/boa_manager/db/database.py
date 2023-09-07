@@ -16,9 +16,9 @@ class Database:
         self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=False,
                                                    bind=self.engine))          
-
+database = Database()
 Base = declarative_base()
-Base.query = Database().session.query_property()
+Base.query = database.session.query_property()
 
 def init_db(base=Base):
-    base.metadata.create_all(bind=Database().engine)
+    base.metadata.create_all(bind=database.engine)
