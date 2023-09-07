@@ -2,6 +2,25 @@ from flask_restful import reqparse, Resource
 from boa_manager.db.database import database
 from boa_manager.db.models.clusters import Cluster
 
+class ClusterListApi(Resource):
+    def get(self):
+
+        # Get all Clusters
+        clusters = Cluster.query.all()
+        response = []
+
+        for cluster in clusters:
+            response.append(
+                {
+                    "id": cluster.id,
+                    "name": cluster.name,
+                    "server_url": cluster.server_url,
+                    "certificate_authority": cluster.certificate_authority
+                }
+            )
+
+        return response, 200
+
 class ClusterApi(Resource):
     def get(self, cluster_name: str):
 
@@ -9,10 +28,9 @@ class ClusterApi(Resource):
         cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
         response = {
             "id": cluster.id,
-            "name": cluster_name,
+            "name": cluster.name,
             "server_url": cluster.server_url,
             "certificate_authority": cluster.certificate_authority
-            
         }
 
         return response, 200  

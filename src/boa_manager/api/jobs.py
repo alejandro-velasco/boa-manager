@@ -12,6 +12,53 @@ from boa_manager.db.models.organizations import Organization
 from boa_manager.db.models.clusters import Cluster
 from boa_manager.api.kubernetes import BoaK8SClient
 
+class JobStatusListApi(Resource):
+    def get(self, organization_name: str, job_name: str):
+
+        # Get Job Id
+        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        job = Job.query.filter(Job.organization_id == organization_id,
+                                Job.name == job_name).one()
+        job_statuses = JobExecution.query.filter(JobExecution.job_id == job.id)
+        response = []
+
+        for status in job_statuses:
+            response.append(
+                {
+                    "id": status.id,
+                    "job_name": job_name,
+                    "organization_name": organization_name,
+                    "execution_id": status.execution_id,
+                    "status": status.status
+                }
+            )
+
+        return response, 200
+
+class JobListApi(Resource):
+    def get(self, organization_name: str):
+
+        # Get Job Id
+        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        jobs = Job.query.filter(Job.organization_id == organization_id)
+        response = []
+
+        for job in jobs:
+            response.append(
+                {
+                    "id": job.id,
+                    "job_name": job.name,
+                    "organization_name": organization_name,
+                    "repo_url": job.repo_url,
+                    "branch": job.branch,
+                    "image": job.image,
+                    "file_path": job.file_path,
+                    "log_level": job.log_level
+                }
+            )
+
+        return response, 200
+
 class JobApi(Resource):
     def get(self, organization_name: str, job_name: str):
 

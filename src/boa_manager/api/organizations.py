@@ -5,6 +5,23 @@ from boa_manager.db.models.organizations import (
     OrganizationUniqueIndex
 )
 
+class OrganizationListApi(Resource):
+    def get(self):
+
+        # Get all Organizations
+        organizations = Organization.query.all()
+        response = []
+
+        for organization in organizations:
+            response.append(
+                {
+                    "id": organization.id,
+                    "name": organization.name
+                }
+            )
+
+        return response, 200
+
 class OrganizationApi(Resource):
     def get(self, organization_name: str):
 
