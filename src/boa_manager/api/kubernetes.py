@@ -100,7 +100,7 @@ class BoaK8SClient:
                         'image': image,
                         'name': "boa-client",
                         'args': [
-                            f"--url {url} --name {name} --execution {execution_id} --server {server} --organization-id {organization_id} {submodules_flag} {branch_flag} {name_flag} {file_flag}"
+                            f"--url {url} --name {name} --execution-id {execution_id} --server {server} --organization-id {organization_id} {submodules_flag} {branch_flag} {name_flag} {file_flag}"
                         ]
                     }
                 ]
