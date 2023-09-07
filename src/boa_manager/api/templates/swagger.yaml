@@ -1,0 +1,666 @@
+openapi: 3.0.3
+info:
+  title: Swagger Boa Manager - OpenAPI 3.0
+  description: |-
+    This is a Boa Manager server based on the OpenAPI 3.0 specification.  
+
+  license:
+    name: MIT License
+    url: https://mit-license.org/
+  version: 1.0.11
+externalDocs:
+  description: Boa Manager Git Hub
+  url: https://github.com/alejandro-velasco/boa-manager
+tags:
+  - name: Organization
+    description: Manage Organizations
+    externalDocs:
+      description: Find out more
+      url: https://github.com/alejandro-velasco/boa-manager
+  - name: Job
+    description: Manage Jobs
+    externalDocs:
+      description: Find out more
+      url: https://github.com/alejandro-velasco/boa-manager
+  - name: Job Status
+    description: Manage Job Statuses
+    externalDocs:
+      description: Find out more
+      url: https://github.com/alejandro-velasco/boa-manager
+  - name: Job Execution
+    description: Manage Job Executions
+    externalDocs:
+      description: Find out more
+      url: https://github.com/alejandro-velasco/boa-manager
+  - name: Cluster
+    description: Manage Cluster Configurations
+    externalDocs:
+      description: Find out more
+      url: https://github.com/alejandro-velasco/boa-manager 
+paths:
+  /api/organizations:
+    get:
+      tags:
+        - Organization
+      summary: List Organizations
+      description: Get a list existing organizations
+      operationId: listOrganizations
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'          
+        '401':
+          description: Unauthenticated
+  /api/organization/{organizationName}:
+    get:
+      parameters:
+        - name: organizationName
+          in: path
+          description: Name of organization to get
+          required: true
+          schema:
+            type: string
+      tags:
+        - Organization
+      summary: Get an Organization
+      description: Get an existing organization by Name
+      operationId: getOrganization
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+    post:
+      parameters:
+      - name: organizationName
+        in: path
+        description: Name of organization to get
+        required: true
+        schema:
+          type: string
+      tags:
+        - Organization
+      summary: Add a new Organization
+      description: Add a new Organization
+      operationId: addOrganization
+      requestBody:
+        description: Create a new organization
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '405':
+          description: Invalid input
+    delete:
+      parameters:
+        - name: organizationName
+          in: path
+          description: Name of Organization to delete
+          required: true
+          schema:
+            type: string
+      tags:
+        - Organization
+      summary: Delete an Organization
+      description: Delete an existing Organization by Name
+      operationId: deleteOrganization
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+  /api/jobs/{organizationName}:
+    get:
+      parameters:
+      - name: organizationName
+        in: path
+        description: Name of organization that owns the jobs
+        required: true
+        schema:
+          type: string
+      tags:
+        - Job
+      summary: List Jobs under an Organization
+      description: Get a list existing organizations
+      operationId: listJobs
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'          
+        '401':
+          description: Unauthenticated
+  /api/job/{organizationName}/{jobName}:
+    get:
+      parameters:
+      - name: organizationName
+        in: path
+        description: Name of organization that owns the job
+        required: true
+        schema:
+          type: string
+      - name: jobName
+        in: path
+        description: Name of job
+        required: true
+        schema:
+          type: string
+      tags:
+        - Job
+      summary: Get an job
+      description: Get an existing job by Name
+      operationId: getJob
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'          
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+    post:
+      parameters:
+      - name: organizationName
+        in: path
+        description: Name of Organization that owns the Job
+        required: true
+        schema:
+          type: string
+      - name: jobName
+        in: path
+        description: Name of Job
+        required: true
+        schema:
+          type: string
+      tags:
+        - Job
+      summary: Add a new Job
+      description: Add a new Job
+      operationId: addJob
+      requestBody:
+        description: Create a new Job
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '405':
+          description: Invalid input
+    delete:
+      parameters:
+      - name: organizationName
+        in: path
+        description: Name of organization that owns the job
+        required: true
+        schema:
+          type: string
+      - name: jobName
+        in: path
+        description: Name of job to execute
+        required: true
+        schema:
+          type: string
+      tags:
+        - Job
+      summary: Delete a Job
+      description: Delete an existing Job by Name
+      operationId: deleteJob
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+  /api/job/{organizationName}/{jobName}/statuses:
+    get:
+      parameters:
+      - name: organizationName
+        in: path
+        description: Name of organization that owns the job
+        required: true
+        schema:
+          type: string
+      - name: jobName
+        in: path
+        description: Name of job to execute
+        required: true
+        schema:
+          type: string
+      tags:
+        - Job Status
+      summary: List Statuses of a Job
+      description: Get a List of Job Statuses
+      operationId: listJobStatuses
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobStatus'          
+        '400':
+          description: Invalid Execution ID supplied
+        '404':
+          description: Execution ID not found
+        '405':
+          description: Validation exception
+  /api/job/status/{executionId}:
+    get:
+      parameters:
+        - name: executionId
+          in: path
+          description: Execution id belonging to a job status
+          required: true
+          schema:
+            type: string
+      tags:
+        - Job Status
+      summary: Get a Job Status
+      description: Get an existing job status by execution id
+      operationId: getJobStatus
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'          
+        '400':
+          description: Invalid Execution ID supplied
+        '404':
+          description: Execution ID not found
+        '405':
+          description: Validation exception
+    put:
+      parameters:
+        - name: executionId
+          in: path
+          description: Execution id belonging to a job status
+          required: true
+          schema:
+            type: string
+      tags:
+        - Job Status
+      summary: Update a Job Status
+      description: Update an existing job status by execution id
+      operationId: updateJobStatus
+      requestBody:
+        description: Update an existent Job Status
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobStatus'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'          
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Job Status not found
+        '405':
+          description: Validation exception
+    delete:
+      parameters:
+        - name: executionId
+          in: path
+          description: Execution id belonging to a job status
+          required: true
+          schema:
+            type: string
+      tags:
+        - Job Status
+      summary: Delete a Job Status
+      description: Delete an existing Job Statu
+      operationId: deleteJobStatus
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+  /api/job/{organizationName}/{jobName}/execute:
+    post:
+      parameters:
+      - name: organizationName
+        in: path
+        description: Name of organization that owns the job
+        required: true
+        schema:
+          type: string
+      - name: jobName
+        in: path
+        description: Name of job to execute
+        required: true
+        schema:
+          type: string
+      tags:
+        - Job Execution
+      summary: Runs an execution of a job
+      description: Run an execution of the job
+      operationId: runExecution
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+        '405':
+          description: Invalid input
+  /api/clusters:
+    get:
+      tags:
+        - Cluster
+      summary: List Cluster Configurations
+      description: List existing cluster configurations
+      operationId: listClusters
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClusterRedacted'   
+        '400':
+          description: Invalid Cluster Name supplied
+        '404':
+          description: Cluster configuration not found
+        '405':
+          description: Validation exception
+  /api/cluster/{clusterName}:
+    get:
+      parameters:
+        - name: clusterName
+          in: path
+          description: Name of Cluster Configuration
+          required: true
+          schema:
+            type: string
+      tags:
+        - Cluster
+      summary: Get a Cluster Configuration
+      description: Get an existing cluster configuration by name
+      operationId: getCluster
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterRedacted'   
+        '400':
+          description: Invalid Cluster Name supplied
+        '404':
+          description: Cluster configuration not found
+        '405':
+          description: Validation exception
+    post:
+      parameters:
+        - name: clusterName
+          in: path
+          description: Name of Cluster configuration
+          required: true
+          schema:
+            type: string
+      tags:
+        - Cluster
+      summary: Create a Cluster Configuration
+      description: Create a Cluster configuration by name
+      operationId: createCluster
+      requestBody:
+        description: Create a cluster configuration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cluster'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cluster'          
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Cluster configuration not found
+        '405':
+          description: Validation exception
+    put:
+      parameters:
+        - name: clusterName
+          in: path
+          description: Name of Cluster configuration
+          required: true
+          schema:
+            type: string
+      tags:
+        - Cluster
+      summary: Update a Cluster Configuration
+      description: Update an existing Cluster configuration by name
+      operationId: updateCluster
+      requestBody:
+        description: Update an existent cluster configuration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cluster'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cluster'          
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Cluster configuration not found
+        '405':
+          description: Validation exception
+    delete:
+      parameters:
+        - name: clusterName
+          in: path
+          description: Name of Cluster configuration
+          required: true
+          schema:
+            type: string
+      tags:
+        - Cluster
+      summary: Delete a Cluster Configuration
+      description: Delete an existing Clusteer configuration by name
+      operationId: deleteCluster
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid Name supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+components:
+  schemas:
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        name:
+          type: string
+          example: my-organization
+          readOnly: true
+    Cluster:
+      required:
+        - server_url
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        name:
+          type: string
+          example: my-cluster
+          readOnly: true
+        server_url:
+          type: string
+          description: Server URL of the Kubernetes API Server Target
+        certificate_authority:
+          type: string
+          description: Base64-Encoded string of the Kubernetes CA Certificate of Kubernetes API Server Target
+        token:
+          type: string
+          description: Bearer token of Kubernetes Service Account for API Server access to target Cluster
+    ClusterRedacted:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        name:
+          type: string
+          example: my-cluster
+        server_url:
+          type: string
+          description: Server URL of the Kubernetes API Server Target
+        certificate_authority:
+          type: string
+          description: Base64-Encoded string of the Kubernetes CA Certificate of Kubernetes API Server Target
+    Job:
+      required:
+        - cluster_name
+        - repo_url
+        - image
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        job_name:
+          type: string
+          description: Name of job
+          readOnly: true
+        organization_name:
+          type: string
+          description: Name of organization
+          readOnly: true
+        cluster_name:
+          type: string
+          description: Name of cluster configuration
+        repo_url:
+          type: string
+          description: URL of git repository containing Boa Job
+          example: "https://github.com/project/repo.git"
+        image:
+          type: string
+          description: Docker image containing boa-client CLI
+          example: 'boa-client:latest'
+        branch:
+          type: string
+          description: Branch to pull from Git repository
+          example: 'main'
+        file_path:
+          type: string
+          description: File path to Boa Job file
+          example: '.ci/boa.yaml'
+        log_level:
+          type: string
+          description: Log Level to set for Boa Job
+          example: INFO
+          enum:
+            - INFO
+            - WARN
+            - DEBUG
+    JobStatus:
+      required:
+        - status
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        job_name:
+          type: string
+          example: my-job
+          description: name of job
+          readOnly: true
+        execution_id:
+          type: string
+          description: execution Id of the job
+          readOnly: true
+        organization_id:
+          type: string
+          description: organization id of organization owning the job
+          readOnly: true
+        status:
+          type: string
+          description: Job Status
+          enum:
+            - running
+            - suceeded
+            - failed

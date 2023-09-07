@@ -8,17 +8,22 @@ from boa_manager.api.clusters import ClusterApi
 from boa_manager.api.jobs import JobApi, JobExecutionApi, JobStatusApi
 
 
+
 def entrypoint():
     app = Flask(__name__)
     api = Api(app)
     init_db()
 
-    api.add_resource(OrganizationApi, '/api/organizations')
-    api.add_resource(ClusterApi, '/api/clusters')
-    api.add_resource(JobApi, '/api/jobs')
-    api.add_resource(JobExecutionApi, '/api/jobs/execute')
-    api.add_resource(JobStatusApi, '/api/jobs/status')
+    api.add_resource(OrganizationApi, '/api/organization/<string:organization_name>')
+    #api.add_resource(OrganizationListApi, '/api/organizations')
+    api.add_resource(ClusterApi, '/api/cluster/<string:cluster_name>')
+    #api.add_resource(ClusterListApi, '/api/cluster/<string:cluster_name>')
+    api.add_resource(JobApi, '/api/job/<string:organization_name>/<string:job_name>')
+    #api.add_resource(JobListApi, '/api/jobs/<string:organization_name>')
+    api.add_resource(JobExecutionApi, '/api/job/<string:organization_name>/<string:job_name>/execute')
+    #api.add_resource(ListJobStatusApi, '/api/job/<string:organization_name>/<string:job_name>/statuses')
+    api.add_resource(JobStatusApi, '/api/job/status/<string:execution_id>')
     serve(app, host='0.0.0.0', port=5000)
-    
+
 if __name__ == '__main__':
     entrypoint()

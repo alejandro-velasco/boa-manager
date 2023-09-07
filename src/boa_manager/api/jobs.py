@@ -3,34 +3,55 @@ import string
 import base64
 import tempfile
 from flask_restful import reqparse, Resource
-from boa_manager.db.database import Database
+from boa_manager.db.database import database
 from boa_manager.db.models.jobs import (
     Job, 
     JobExecution
 )
+from boa_manager.db.models.organizations import Organization
 from boa_manager.db.models.clusters import Cluster
 from boa_manager.api.kubernetes import BoaK8SClient
 
 class JobApi(Resource):
-    def post(self):
+    def get(self, organization_name: str, job_name: str):
+
+        # Get Job Id
+        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        job_query = Job.query.filter(Job.name == job_name,
+                               Job.organization_id == organization_id).one()
+        response = {
+            "id": job_query.id,
+            "job_name": job_query.name,
+            "organization_name": organization_name,
+            "repo_url": job_query.repo_url,
+            "branch": job_query.branch,
+            "image": job_query.image,
+            "file_path": job_query.file_path,
+            "log_level": job_query.log_level
+        }
+
+        return response, 200
+    
+    def post(self, organization_name: str, job_name: str):
         # Parse Arguments
         parser = reqparse.RequestParser()
-        parser.add_argument('name', required=True)
-        parser.add_argument('organization_id', required=True)
         parser.add_argument('image', required=True)
-        parser.add_argument('cluster_id', required=True)
+        parser.add_argument('cluster_name', required=True)
         parser.add_argument('repo_url', required=True)
         parser.add_argument('branch', required=False)
         parser.add_argument('file_path', required=False)
         parser.add_argument('log_level', required=False)
         args = parser.parse_args()
 
+        # Get Organization Id and Cluster Id
+        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id
+
         # Create Job in the Database
-        db = Database()
         job = Job(
-            name=args.name,
-            organization_id=args.organization_id,
-            cluster_id=args.cluster_id,
+            name=job_name,
+            organization_id=organization_id,
+            cluster_id=cluster_id,
             repo_url=args.repo_url,
             branch=args.branch,
             file_path=args.file_path,
@@ -39,35 +60,87 @@ class JobApi(Resource):
         )        
 
         # Commit to Database
-        db.session.add(job)
-        db.session.commit()
+        database.session.add(job)
+        database.session.commit()
 
-        return args, 201
-    
-    def get(self):
-        # Parse Arguments
-        parser = reqparse.RequestParser()
-        parser.add_argument('name', required=True)
-        parser.add_argument('organization_id', required=True)
-        args = parser.parse_args()
+        job_query = job.query.filter(Job.name == job_name,
+                                     Job.organization_id == organization_id).one()
 
-        # Get Job Id
-        job_id = Job.query.filter(Job.name == args.name,
-                                  Job.organization_id == args.organization_id).one().id
-        resp = {
-            "name": args.name,
-            "organization_id": args.organization_id,
-            "job_id": str(job_id)
+        response = {
+            "id": job_query.id,
+            "job_name": job_query.name,
+            "cluster_name": args.cluster_name,
+            "organization_name": organization_name,
+            "repo_url": job_query.repo_url,
+            "branch": job_query.branch,
+            "image": job_query.image,
+            "file_path": job_query.file_path,
+            "log_level": job_query.log_level
         }
 
-        return resp, 200
+        return response, 201
     
-class JobExecutionApi(Resource):
-    def post(self):
+    def put(self, organization_name: str, job_name: str):
         # Parse Arguments
         parser = reqparse.RequestParser()
-        parser.add_argument('name', required=True)
-        parser.add_argument('organization_id', required=True)
+        parser.add_argument('image', required=True)
+        parser.add_argument('cluster_name', required=True)
+        parser.add_argument('repo_url', required=True)
+        parser.add_argument('branch', required=False)
+        parser.add_argument('file_path', required=False)
+        parser.add_argument('log_level', required=False)
+        args = parser.parse_args()
+
+        # Get Organization Id and Cluster Id
+        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id
+
+        # Update Job in the Database
+        database.session.query(Job).filter_by(name=job_name,
+                                        organization_id=organization_id).update({'name': job_name,
+                                                                                 'organization_id': organization_id,
+                                                                                 'cluster_id': cluster_id,
+                                                                                 'repo_url': args.repo_url,
+                                                                                 'branch': args.branch,
+                                                                                 'file_path': args.file_path,
+                                                                                 'image': args.image,
+                                                                                 'log_level': args.log_level})
+
+        database.session.commit()
+
+        job_query = Job.query.filter(Job.name == job_name,
+                                     Job.organization_id == organization_id).one()
+
+        response = {
+            "id": job_query.id,
+            "job_name": job_query.name,
+            "cluster_name": args.cluster_name,
+            "organization_name": organization_name,
+            "repo_url": job_query.repo_url,
+            "branch": job_query.branch,
+            "image": job_query.image,
+            "file_path": job_query.file_path,
+            "log_level": job_query.log_level
+        }
+
+        return response, 201
+
+    def delete(self, organization_name: str, job_name: str):
+
+        # Drop Job Row
+        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        row = Job.query.filter(Job.name == job_name,
+                               Job.organization_id == organization_id).one()
+        database.session.delete(row)
+        database.session.commit() 
+    
+        return 200
+    
+class JobExecutionApi(Resource):
+    def post(self, organization_name: str, job_name: str):
+
+        # Parse Arguments
+        parser = reqparse.RequestParser()
         parser.add_argument('server', required=True)
         args = parser.parse_args()
 
@@ -75,23 +148,23 @@ class JobExecutionApi(Resource):
         execution_id = ''.join(random.choices(string.ascii_lowercase +
                                               string.digits, k=10))
 
-        # Query Cluster and Job tables
-        job_query = Job.query.filter(Job.name == args.name,
-                                      Job.organization_id == args.organization_id).one()
+        # Query Cluster, Organization, and Job tables
+        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        job_query = Job.query.filter(Job.name == job_name,
+                                      Job.organization_id == organization_id).one()
         cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
 
         # Get Cluster / Job table in the Database
-        db = Database()
         job_execution=JobExecution(job_id=job_query.id,
                                    organization_id=job_query.organization_id,
                                    execution_id=execution_id,
                                    status='Pending')
 
         # Commit Pending Execution to Database
-        db.session.add(job_execution)
-        db.session.commit()
+        database.session.add(job_execution)
+        database.session.commit()
 
-
+        job_execution_query = job_execution.query.filter(JobExecution.execution_id == execution_id).one()
 
         f = tempfile.NamedTemporaryFile(mode='w+')
 
@@ -109,46 +182,53 @@ class JobExecutionApi(Resource):
             )
 
             client.create_pod(
-                name=args.name,
+                name=job_name,
                 image=job_query.image,
                 url=job_query.repo_url,
                 execution_id=execution_id,
-                organization_id=args.organization_id,
+                organization_id=organization_id,
                 server=args.server
             )
                 
         finally:
             f.close()
 
-        return 200
+        response = {
+            "id": job_execution_query.id,
+            "job_name": job_name,
+            "execution_id": job_execution_query.execution_id,
+            "organization_name": organization_name,
+            "status": job_execution_query.status
+        }
+
+        return response, 200
     
 class JobStatusApi(Resource):
-    def put(self):
+    def put(self, execution_id: str):
         # Parse Arguments
         parser = reqparse.RequestParser()
-        parser.add_argument('job_name', required=True)
-        parser.add_argument('organization_id', required=True)
-        parser.add_argument('execution', required=True)
-        parser.add_argument('status', required=True)
-        
+        parser.add_argument('status', required=True) 
         args = parser.parse_args()
 
         # Get Cluster / Job table in the Database
-        db = Database()
-        job_query = Job.query.filter(Job.name == args.job_name,
-                                     Job.organization_id == args.organization_id).one()
-        
-        db.session.query(JobExecution).filter_by(job_id=job_query.id,
-                                                 organization_id=job_query.organization_id,
-                                                 execution_id=args.execution).update({'status': args.status}) 
+        database.session.query(JobExecution).filter_by(execution_id=execution_id).update({'status': args.status}) 
 
         # Commit Updated Execution status to Database
-        db.session.commit()
+        database.session.commit()
 
         if args.status in ['failed', 'succeeded', 'aborted']:
 
-            # Query Cluster table
+            # Query Job Executions Table
+            job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+
+            # Query Jobs Table
+            job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
+
+            # Query Clusters table
             cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
+
+            # Query Organizations table
+            organization_query = Organization.query.filter(Organization.id == job_execution_query.organization_id).one()
 
             f = tempfile.NamedTemporaryFile(mode='w+')
     
@@ -166,12 +246,50 @@ class JobStatusApi(Resource):
                 )
 
                 client.delete_pod(
-                    name=args.job_name,
-                    execution_id=args.execution,
-                    organization_id=args.organization_id
+                    name=job_query.name,
+                    execution_id=execution_id,
+                    organization_id=organization_query.id
                 )
 
             finally:
                 f.close()
 
-        return 200  
+        response = {
+            "id": job_execution_query.id,
+            "job_name": job_query.name,
+            "execution_id": job_execution_query.execution_id,
+            "organization_name": organization_query.id,
+            "status": job_execution_query.status
+        }
+
+        return response, 200
+    
+    def delete(self, execution_id: str):
+
+        # Drop Job Row
+        row = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+        database.session.delete(row)
+        database.session.commit() 
+    
+        return 200
+
+    def get(self, execution_id: str):
+
+        # Query Job Executions Table
+        job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+        
+        # Query Jobs Table
+        job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
+
+        # Get Organization Id
+        organization_id = Organization.query.filter(Organization.id == job_execution_query.organization_id).one().id
+
+        response = {
+            "id": job_execution_query.id,
+            "job_name": job_query.id,
+            "execution_id": job_execution_query.execution_id,
+            "organization_name": organization_id,
+            "status": job_execution_query.status
+        }
+    
+        return response, 200

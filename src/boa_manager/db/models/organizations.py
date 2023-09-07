@@ -31,3 +31,6 @@ class OrganizationUniqueIndex():
 
     def create(self):
         self.index.create(self.engine)
+
+    def drop(self):
+        self.index.drop(self.engine)
