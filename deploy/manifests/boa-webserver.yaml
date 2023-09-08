@@ -1,0 +1,113 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-webserver
+  namespace: boa
+  labels:
+    app: boa-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: boa-webserver
+  template:
+    metadata:
+      labels:
+        app: boa-webserver
+    spec:
+      containers:
+      - name: boa-webserver
+        image: nginxinc/nginx-unprivileged:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: nginx-config
+          mountPath: "/etc/nginx/nginx.conf"
+          subPath: "nginx.conf"
+          readOnly: true
+      volumes:
+      # You set volumes at the Pod level, then mount them into containers inside that Pod
+      - name: nginx-config
+        configMap:
+          # Provide the name of the ConfigMap you want to mount.
+          name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: boa-webserver
+  name: boa-webserver
+  namespace: boa
+spec:
+  ports:
+  - port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app: boa-webserver
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: boa
+data:
+  nginx.conf: |
+    worker_processes  auto;
+    
+    error_log  /var/log/nginx/error.log notice;
+    pid        /tmp/nginx.pid;
+    
+    
+    events {
+        worker_connections  1024;
+    }
+    
+    
+    http {
+        proxy_temp_path /tmp/proxy_temp;
+        client_body_temp_path /tmp/client_temp;
+        fastcgi_temp_path /tmp/fastcgi_temp;
+        uwsgi_temp_path /tmp/uwsgi_temp;
+        scgi_temp_path /tmp/scgi_temp;
+    
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+    
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+    
+        access_log  /var/log/nginx/access.log  main;
+    
+        sendfile        on;
+        #tcp_nopush     on;
+    
+        keepalive_timeout  65;
+    
+        #gzip  on;
+    
+        include /etc/nginx/conf.d/*.conf;
+
+        server {
+            listen 8081;
+            server_name _;
+        
+            location /api {
+                proxy_pass http://boa-manager.boa:5000;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+
+            location /docs {
+                proxy_pass http://boa-api-documentation.boa:8080;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+        }
+    }
