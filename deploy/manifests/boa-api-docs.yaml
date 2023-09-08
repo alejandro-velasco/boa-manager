@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-api-documentation
+  namespace: boa
+  labels:
+    app: boa-api-documentation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: boa-api-documentation
+  template:
+    metadata:
+      labels:
+        app: boa-api-documentation
+    spec:
+      containers:
+      - name: boa-api-documentation
+        image: boa-api-documentation:test
+        imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: boa-api-documentation
+  name: boa-api-documentation
+  namespace: boa
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: boa-api-documentation
+  type: ClusterIP
