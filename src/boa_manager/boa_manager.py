@@ -1,7 +1,6 @@
-import os
 from waitress import serve
-from flask import Flask, request
-from flask_restful import Resource, Api
+from flask import Flask
+from flask_restful import Api
 from boa_manager.db.database import Database, init_db
 from boa_manager.api.organizations import OrganizationApi, OrganizationListApi
 from boa_manager.api.clusters import ClusterApi, ClusterListApi

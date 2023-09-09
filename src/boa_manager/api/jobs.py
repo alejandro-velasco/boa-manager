@@ -2,6 +2,7 @@ import random
 import string
 import base64
 import tempfile
+from flask import request
 from sqlalchemy.exc import NoResultFound
 from flask_restful import reqparse, Resource
 from boa_manager.db.database import database
@@ -207,11 +208,9 @@ class JobApi(Resource):
     
 class JobExecutionApi(Resource):
     def post(self, organization_name: str, job_name: str):
-
-        # Parse Arguments
-        parser = reqparse.RequestParser()
-        parser.add_argument('server', required=True)
-        args = parser.parse_args()
+        
+        # generate server host_url
+        server = request.host_url.rstrip('/')
 
         # Generate Execution ID
         execution_id = ''.join(random.choices(string.ascii_lowercase +
@@ -260,7 +259,7 @@ class JobExecutionApi(Resource):
                 url=job_query.repo_url,
                 execution_id=execution_id,
                 organization_id=organization_id,
-                server=args.server
+                server=server
             )
                 
         finally:
