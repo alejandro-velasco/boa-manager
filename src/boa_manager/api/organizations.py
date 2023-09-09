@@ -1,4 +1,5 @@
 from flask_restful import reqparse, Resource
+from sqlalchemy.exc import NoResultFound
 from boa_manager.db.database import database
 from boa_manager.db.models.organizations import (
     Organization,
@@ -25,8 +26,12 @@ class OrganizationListApi(Resource):
 class OrganizationApi(Resource):
     def get(self, organization_name: str):
 
-        # Get Organization Id
-        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        try:
+            # Get Organization Id
+            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        except NoResultFound:
+            return 404
+
 
         response = {
             "id": organization_id,
@@ -62,15 +67,18 @@ class OrganizationApi(Resource):
 
     def delete(self, organization_name: str):
 
-        # Drop Organization Row
-        row = Organization.query.filter(Organization.name == organization_name).one()
-        database.session.delete(row)
-        database.session.commit()
+        try:
+            # Drop Organization Row
+            row = Organization.query.filter(Organization.name == organization_name).one()
+            database.session.delete(row)
+            database.session.commit()
+             
+            # Drop Partial Unique Index
+            unique_index = OrganizationUniqueIndex(id=row.id, 
+                                                   engine=database.engine)
+            unique_index.drop()
 
-        # Drop Partial Unique Index
-        unique_index = OrganizationUniqueIndex(id=row.id, 
-                                               engine=database.engine)
-        unique_index.drop()
-        
+        except NoResultFound:
+            return 404        
     
         return 200

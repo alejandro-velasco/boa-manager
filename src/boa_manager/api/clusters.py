@@ -1,4 +1,5 @@
 from flask_restful import reqparse, Resource
+from sqlalchemy.exc import NoResultFound
 from boa_manager.db.database import database
 from boa_manager.db.models.clusters import Cluster
 
@@ -23,9 +24,13 @@ class ClusterListApi(Resource):
 
 class ClusterApi(Resource):
     def get(self, cluster_name: str):
-
-        # Get Cluster Row
-        cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
+        try:
+            # Get Cluster Row
+            cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
+            
+        except NoResultFound:
+            return 404
+        
         response = {
             "id": cluster.id,
             "name": cluster.name,
@@ -77,13 +82,18 @@ class ClusterApi(Resource):
         parser.add_argument('token')
         args = parser.parse_args()
 
-        # Update Cluster Row
-        database.session.query(Cluster).filter_by(name=cluster_name).update({"server_url": args.server_url,
-                                                                       "certificate_authority": args.certificate_authority,
-                                                                       "token": args.token}) 
-        cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
-        database.session.commit()
 
+        try:
+            # Update Cluster Row
+            database.session.query(Cluster).filter_by(name=cluster_name).update({"server_url": args.server_url,
+                                                                           "certificate_authority": args.certificate_authority,
+                                                                           "token": args.token}) 
+            cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
+            database.session.commit()
+        
+        except NoResultFound:
+            return 404
+        
         response = {
             "id": cluster.id,
             "name": cluster.name,
@@ -95,10 +105,13 @@ class ClusterApi(Resource):
         return response, 200
     
     def delete(self, cluster_name: str):
+        try:
+            # Drop Cluster Row
+            row = Cluster.query.filter(Cluster.name == cluster_name).one()
+            database.session.delete(row)
+            database.session.commit() 
 
-        # Drop Cluster Row
-        row = Cluster.query.filter(Cluster.name == cluster_name).one()
-        database.session.delete(row)
-        database.session.commit() 
-    
+        except NoResultFound:
+            return 404
+        
         return 200
