@@ -30,7 +30,10 @@ class OrganizationApi(Resource):
             # Get Organization Id
             organization_id = Organization.query.filter(Organization.name == organization_name).one().id
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Organization does not exist."
+            }
+            return response, 404
 
 
         response = {
@@ -79,6 +82,9 @@ class OrganizationApi(Resource):
             unique_index.drop()
 
         except NoResultFound:
-            return 404        
+            response = {
+                "message": "Organization does not exist."
+            }
+            return response, 404
     
         return 200

@@ -29,7 +29,10 @@ class ClusterApi(Resource):
             cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
             
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Cluster does not exist."
+            }
+            return response, 404
         
         response = {
             "id": cluster.id,
@@ -49,18 +52,24 @@ class ClusterApi(Resource):
         parser.add_argument('token')
         args = parser.parse_args()
 
-        # Create Cluster in the Database
-        cluster = Cluster(
-            name=cluster_name,
-            server_url=args.server_url,
-            certificate_authority=args.certificate_authority,
-            token=args.token
-        )
-
-        # Commit to Database
-        database.session.add(cluster)
-        database.session.commit()
-
+        try:
+            # Create Cluster in the Database
+            cluster = Cluster(
+                name=cluster_name,
+                server_url=args.server_url,
+                certificate_authority=args.certificate_authority,
+                token=args.token
+            )
+    
+            # Commit to Database
+            database.session.add(cluster)
+            database.session.commit()
+        except NoResultFound:
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405 
+        
         cluster_query = cluster.query.filter(Cluster.name == cluster_name).one()
 
         response = {
@@ -92,7 +101,10 @@ class ClusterApi(Resource):
             database.session.commit()
         
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405 
         
         response = {
             "id": cluster.id,
@@ -112,6 +124,9 @@ class ClusterApi(Resource):
             database.session.commit() 
 
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Cluster does not exist."
+            }
+            return response, 404
         
         return 200

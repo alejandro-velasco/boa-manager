@@ -45,7 +45,10 @@ class JobListApi(Resource):
             organization_id = Organization.query.filter(Organization.name == organization_name).one().id
 
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Organization not found."
+            }
+            return response, 404
         
         jobs = Job.query.filter(Job.organization_id == organization_id)
         response = []
@@ -72,11 +75,16 @@ class JobApi(Resource):
         try:
             # Get Organization Id
             organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        
+            # Get Job
             job_query = Job.query.filter(Job.name == job_name,
                                          Job.organization_id == organization_id).one()
-            
+    
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Job not found."
+            }
+            return response, 404
         
         response = {
             "id": job_query.id,
@@ -103,10 +111,12 @@ class JobApi(Resource):
         args = parser.parse_args()
 
         try:
-            # Get Organization Id and Cluster Id
+            # Get Organization Id
             organization_id = Organization.query.filter(Organization.name == organization_name).one().id
-            cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id
-    
+
+            # Get Cluster Id        
+            cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id   
+        
             # Create Job in the Database
             job = Job(
                 name=job_name,
@@ -123,10 +133,14 @@ class JobApi(Resource):
             database.session.add(job)
             database.session.commit()
     
-            job_query = job.query.filter(Job.name == job_name,
-                                         Job.organization_id == organization_id).one()
         except NoResultFound:
-            return 405
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405 
+
+        job_query = job.query.filter(Job.name == job_name,
+                                     Job.organization_id == organization_id).one()
         
         response = {
             "id": job_query.id,
@@ -156,10 +170,10 @@ class JobApi(Resource):
         try:
             # Get Organization Id
             organization_id = Organization.query.filter(Organization.name == organization_name).one().id
-        
+            
             # Get Cluster Id
             cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id
-
+      
             # Update Job in the Database
             database.session.query(Job).filter_by(name=job_name,
                                                   organization_id=organization_id).update({'name': job_name,
@@ -176,7 +190,10 @@ class JobApi(Resource):
             job_query = Job.query.filter(Job.name == job_name,
                                          Job.organization_id == organization_id).one()
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405
     
         response = {
             "id": job_query.id,
@@ -202,7 +219,10 @@ class JobApi(Resource):
             database.session.delete(row)
             database.session.commit() 
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Job not found."
+            }
+            return response, 404
         
         return 200
     
@@ -217,26 +237,31 @@ class JobExecutionApi(Resource):
                                               string.digits, k=10))
 
         try:
-            # Query Cluster, Organization, and Job tables
+            # Get Organization Id
             organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+
+            # Get Job
             job_query = Job.query.filter(Job.name == job_name,
                                           Job.organization_id == organization_id).one()
+            
+            # Get Cluster Configuration
             cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
-    
-            # Get Cluster / Job table in the Database
+        
+            # Create Job execution
             job_execution=JobExecution(job_id=job_query.id,
                                        organization_id=job_query.organization_id,
                                        execution_id=execution_id,
                                        status='Pending')
-    
-            # Commit Pending Execution to Database
             database.session.add(job_execution)
             database.session.commit()
     
             job_execution_query = job_execution.query.filter(JobExecution.execution_id == execution_id).one()
 
         except NoResultFound:
-            return 405
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405
 
         f = tempfile.NamedTemporaryFile(mode='w+')
 
@@ -289,13 +314,16 @@ class JobStatusApi(Resource):
             # Commit Updated Execution status to Database
             database.session.commit()
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Execution does not exist."
+            }
+            return response, 404
 
         if args.status in ['failed', 'succeeded', 'aborted']:
             try:
                 # Query Job Executions Table
                 job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
-    
+
                 # Query Jobs Table
                 job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
     
@@ -326,7 +354,10 @@ class JobStatusApi(Resource):
                 )
 
             except NoResultFound:
-                return 404
+                response = {
+                    "message": "Invalid Request."
+                }
+                return response, 405
             
             finally:
                 f.close()
@@ -349,7 +380,10 @@ class JobStatusApi(Resource):
             database.session.delete(row)
             database.session.commit() 
         except NoResultFound:
-            return 404
+            response = {
+                "message": "Execution does not exist."
+            }
+            return response, 404
         
         return 200
 
@@ -364,7 +398,10 @@ class JobStatusApi(Resource):
             # Get Organization Id
             organization_id = Organization.query.filter(Organization.id == job_execution_query.organization_id).one().id
         except NoResultFound:
-            return 404      
+            response = {
+                "message": "Execution does not exist."
+            }
+            return response, 405    
         
         response = {
             "id": job_execution_query.id,
