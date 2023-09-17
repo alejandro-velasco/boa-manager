@@ -17,7 +17,8 @@ class OrganizationListApi(Resource):
             response.append(
                 {
                     "id": organization.id,
-                    "name": organization.name
+                    "name": organization.name,
+                    "description": organization.description
                 }
             )
 
