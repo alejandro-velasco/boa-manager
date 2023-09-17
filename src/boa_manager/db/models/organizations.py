@@ -3,6 +3,7 @@ from sqlalchemy import (
     Integer, 
     String,
     Index,
+    Text,
     Engine
 )
 
@@ -13,9 +14,11 @@ class Organization(Base):
     __tablename__ = 'organizations'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False)
+    description = Column(Text, unique=False, nullable=False, default='')
 
-    def __init__(self, name=None):
-        self.name = name
+    def __init__(self, name=None, description=None):
+        self.name = name,
+        self.description = description
 
     def __repr__(self):
         return f'<Organization {self.name!r}>'

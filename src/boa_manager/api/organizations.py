@@ -28,7 +28,7 @@ class OrganizationApi(Resource):
 
         try:
             # Get Organization Id
-            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+            organization = Organization.query.filter(Organization.name == organization_name).one()
         except NoResultFound:
             response = {
                 "message": "Organization does not exist."
@@ -37,16 +37,23 @@ class OrganizationApi(Resource):
 
 
         response = {
-            "id": organization_id,
-            "name": organization_name
+            "id": organization.id,
+            "name": organization.name,
+            "description": organization.description
         }
 
         return response, 200
 
     def post(self, organization_name: str):
 
+        # Parse Arguments
+        parser = reqparse.RequestParser()
+        parser.add_argument('description', required=False, default="")
+        args = parser.parse_args()
+
         # Create Organization in the Database
-        org = Organization(name=organization_name)
+        org = Organization(name=organization_name,
+                           description=args.description)
 
         # Commit to Database
         database.session.add(org)
@@ -63,7 +70,36 @@ class OrganizationApi(Resource):
 
         response = {
             "id": organization_id,
-            "name": organization_name
+            "name": organization_name,
+            "description": args.description
+        }
+
+        return response, 201
+
+    def put(self, organization_name: str):
+        # Parse Arguments
+        parser = reqparse.RequestParser()
+        parser.add_argument('description', required=False, default="")
+        args = parser.parse_args()
+
+        try:
+            # Update Organization in the Database
+            database.session.query(Organization).filter_by(name=organization_name).update({'description': args.description})
+
+            database.session.commit()
+
+            organization_query = Organization.query.filter(Organization.name == organization_name).one()
+
+        except NoResultFound:
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405
+    
+        response = {
+            "id": organization_query.id,
+            "name": organization_query.name,
+            "description": organization_query.description
         }
 
         return response, 201
