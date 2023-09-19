@@ -40,6 +40,14 @@ def init_api():
     api.add_resource(JobStatusListApi, '/api/job/<string:organization_name>/<string:job_name>/statuses')
     api.add_resource(JobStatusApi, '/api/job/status/<string:execution_id>')
 
+#
+# Swagger API
+#
+
+@app.route('/docs/api')
+def get_docs():
+    return render_template('swaggerui/swaggerui.html')
+
 @app.route("/ui")
 def homepage():
     return render_template("index.html")
