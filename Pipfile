@@ -9,7 +9,11 @@ flask = "*"
 flask-restful = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
-waitress = "*"
+waitress = ">=2.1.2"
+python-dateutil = "==2.6.0"
+flask-assets = "*"
+pytailwindcss = "*"
+requests = "*"
 
 [dev-packages]
 

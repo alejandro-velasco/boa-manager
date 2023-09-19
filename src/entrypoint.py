@@ -26,7 +26,8 @@ def entrypoint():
     api.add_resource(JobExecutionApi, '/api/job/<string:organization_name>/<string:job_name>/execute')
     api.add_resource(JobStatusListApi, '/api/job/<string:organization_name>/<string:job_name>/statuses')
     api.add_resource(JobStatusApi, '/api/job/status/<string:execution_id>')
-    serve(app, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', debug=True)
+    #serve(app, host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     entrypoint()
