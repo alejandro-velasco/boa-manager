@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Main Content -->
+    <main class="flex-1 p-10">
+        <div class="flex border-b border-gray-400">
+            <h2 class="py-4 text-2xl font-opensans font-semibold text-white">
+                Create a Job
+            </h2>
+        </div>
+        <div class="flex items-center justify-center">
+            <div class="my-8 mx-4 w-5/6 h-5/6 bg-slate-800 rounded-lg shadow-lg">
+                <form method="post" id="job-create" action="/ui/jobs/{{ organization }}/create">
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-opensans font-semibold" for="job-name">Name:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="job-name" name="job-name" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-opensans font-semibold" for="cluster-name">Cluster:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="cluster-name" name="cluster-name" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-opensans font-semibold" for="repo-url">Repository URL:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="repo-url" name="repo-url" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-opensans font-semibold" for="branch">Branch:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="branch" name="branch">
+                    </div><div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-opensans font-semibold" for="image">Container Image:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="image" name="image" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-opensans font-semibold" for="file-path">File Path:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="file-path" name="file-path">
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-opensans font-semibold" for="log-level">Log Level:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="log-level" name="log-level">
+                    </div>
+                    <div class="bg-gray-900 mx-4 my-8 flex items-center justify-center text-white text-align-center font-bold w-36 h-12 my-2 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-700 duration-300 rounded-lg shadow-lg overflow-hidden">
+                        <button class="mx-4" type="submit">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>      
+    </main>
+{% endblock content %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Main Content -->
+    <main class="flex-1 p-10">
+        <div class="flex border-b border-gray-400">
+            <h2 class="py-4 text-2xl font-opensans font-semibold text-white">
+                All Organizations
+            </h2>
+            <form class="flex items-center justify-center text-white text-align-center font-bold w-12 h-12 my-2 ml-auto transition ease-in-out delay-150 bg-slate-800 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-700 duration-300 rounded-lg shadow-lg overflow-hidden" action="/ui/organizations/create/form">
+                <input class="p-4" type="submit" value="+" />
+            </form>
+        </div>
+        <div class="flex flex-wrap items-left justify-left">
+            {% if organizations|length>0 %}
+            {% for org in organizations %}
+            <div class="my-8 mr-4">
+                <a href="/ui/organization/{{ org.name }}">
+                    <div class="w-96 h-64 transition ease-in-out delay-150 bg-slate-800 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-700 duration-300 rounded-lg shadow-lg overflow-hidden">
+                        <div class="p-8">
+                            <h2 class="border-b border-gray-400 text-2xl font-opensans font-semibold text-white">
+                                {{ org.name }}
+                            </h2>
+                            <p class="text-slate-300 font-opensans mt-2">{{ org.description }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-slate-300 text-2xl font-opensans mt-2">There are currently no Organizations.</p>
+            {% endif %}
+        </div>      
+    </main>
+{% endblock content %}
+
+
