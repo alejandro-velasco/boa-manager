@@ -2,6 +2,8 @@ import random
 import string
 import base64
 import tempfile
+from flask import request
+from sqlalchemy.exc import NoResultFound
 from flask_restful import reqparse, Resource
 from boa_manager.db.database import database
 from boa_manager.db.models.jobs import (
@@ -39,7 +41,15 @@ class JobListApi(Resource):
     def get(self, organization_name: str):
 
         # Get Job Id
-        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        try:
+            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+
+        except NoResultFound:
+            response = {
+                "message": "Organization not found."
+            }
+            return response, 404
+        
         jobs = Job.query.filter(Job.organization_id == organization_id)
         response = []
 
@@ -62,10 +72,20 @@ class JobListApi(Resource):
 class JobApi(Resource):
     def get(self, organization_name: str, job_name: str):
 
-        # Get Job Id
-        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
-        job_query = Job.query.filter(Job.name == job_name,
-                               Job.organization_id == organization_id).one()
+        try:
+            # Get Organization Id
+            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+        
+            # Get Job
+            job_query = Job.query.filter(Job.name == job_name,
+                                         Job.organization_id == organization_id).one()
+    
+        except NoResultFound:
+            response = {
+                "message": "Job not found."
+            }
+            return response, 404
+        
         response = {
             "id": job_query.id,
             "job_name": job_query.name,
@@ -90,29 +110,38 @@ class JobApi(Resource):
         parser.add_argument('log_level', required=False)
         args = parser.parse_args()
 
-        # Get Organization Id and Cluster Id
-        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
-        cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id
+        try:
+            # Get Organization Id
+            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
 
-        # Create Job in the Database
-        job = Job(
-            name=job_name,
-            organization_id=organization_id,
-            cluster_id=cluster_id,
-            repo_url=args.repo_url,
-            branch=args.branch,
-            file_path=args.file_path,
-            image=args.image,
-            log_level=args.log_level
-        )        
-
-        # Commit to Database
-        database.session.add(job)
-        database.session.commit()
+            # Get Cluster Id        
+            cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id   
+        
+            # Create Job in the Database
+            job = Job(
+                name=job_name,
+                organization_id=organization_id,
+                cluster_id=cluster_id,
+                repo_url=args.repo_url,
+                branch=args.branch,
+                file_path=args.file_path,
+                image=args.image,
+                log_level=args.log_level
+            )        
+    
+            # Commit to Database
+            database.session.add(job)
+            database.session.commit()
+    
+        except NoResultFound:
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405 
 
         job_query = job.query.filter(Job.name == job_name,
                                      Job.organization_id == organization_id).one()
-
+        
         response = {
             "id": job_query.id,
             "job_name": job_query.name,
@@ -138,26 +167,34 @@ class JobApi(Resource):
         parser.add_argument('log_level', required=False)
         args = parser.parse_args()
 
-        # Get Organization Id and Cluster Id
-        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
-        cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id
+        try:
+            # Get Organization Id
+            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+            
+            # Get Cluster Id
+            cluster_id = Cluster.query.filter(Cluster.name == args.cluster_name).one().id
+      
+            # Update Job in the Database
+            database.session.query(Job).filter_by(name=job_name,
+                                                  organization_id=organization_id).update({'name': job_name,
+                                                                                           'organization_id': organization_id,
+                                                                                           'cluster_id': cluster_id,
+                                                                                           'repo_url': args.repo_url,
+                                                                                           'branch': args.branch,
+                                                                                           'file_path': args.file_path,
+                                                                                           'image': args.image,
+                                                                                           'log_level': args.log_level})
 
-        # Update Job in the Database
-        database.session.query(Job).filter_by(name=job_name,
-                                        organization_id=organization_id).update({'name': job_name,
-                                                                                 'organization_id': organization_id,
-                                                                                 'cluster_id': cluster_id,
-                                                                                 'repo_url': args.repo_url,
-                                                                                 'branch': args.branch,
-                                                                                 'file_path': args.file_path,
-                                                                                 'image': args.image,
-                                                                                 'log_level': args.log_level})
+            database.session.commit()
 
-        database.session.commit()
-
-        job_query = Job.query.filter(Job.name == job_name,
-                                     Job.organization_id == organization_id).one()
-
+            job_query = Job.query.filter(Job.name == job_name,
+                                         Job.organization_id == organization_id).one()
+        except NoResultFound:
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405
+    
         response = {
             "id": job_query.id,
             "job_name": job_query.name,
@@ -174,44 +211,57 @@ class JobApi(Resource):
 
     def delete(self, organization_name: str, job_name: str):
 
-        # Drop Job Row
-        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
-        row = Job.query.filter(Job.name == job_name,
-                               Job.organization_id == organization_id).one()
-        database.session.delete(row)
-        database.session.commit() 
-    
+        try:
+            # Drop Job Row
+            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
+            row = Job.query.filter(Job.name == job_name,
+                                   Job.organization_id == organization_id).one()
+            database.session.delete(row)
+            database.session.commit() 
+        except NoResultFound:
+            response = {
+                "message": "Job not found."
+            }
+            return response, 404
+        
         return 200
     
 class JobExecutionApi(Resource):
     def post(self, organization_name: str, job_name: str):
-
-        # Parse Arguments
-        parser = reqparse.RequestParser()
-        parser.add_argument('server', required=True)
-        args = parser.parse_args()
+        
+        # generate server host_url
+        server = request.host_url.rstrip('/')
 
         # Generate Execution ID
         execution_id = ''.join(random.choices(string.ascii_lowercase +
                                               string.digits, k=10))
 
-        # Query Cluster, Organization, and Job tables
-        organization_id = Organization.query.filter(Organization.name == organization_name).one().id
-        job_query = Job.query.filter(Job.name == job_name,
-                                      Job.organization_id == organization_id).one()
-        cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
+        try:
+            # Get Organization Id
+            organization_id = Organization.query.filter(Organization.name == organization_name).one().id
 
-        # Get Cluster / Job table in the Database
-        job_execution=JobExecution(job_id=job_query.id,
-                                   organization_id=job_query.organization_id,
-                                   execution_id=execution_id,
-                                   status='Pending')
+            # Get Job
+            job_query = Job.query.filter(Job.name == job_name,
+                                          Job.organization_id == organization_id).one()
+            
+            # Get Cluster Configuration
+            cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
+        
+            # Create Job execution
+            job_execution=JobExecution(job_id=job_query.id,
+                                       organization_id=job_query.organization_id,
+                                       execution_id=execution_id,
+                                       status='Pending')
+            database.session.add(job_execution)
+            database.session.commit()
+    
+            job_execution_query = job_execution.query.filter(JobExecution.execution_id == execution_id).one()
 
-        # Commit Pending Execution to Database
-        database.session.add(job_execution)
-        database.session.commit()
-
-        job_execution_query = job_execution.query.filter(JobExecution.execution_id == execution_id).one()
+        except NoResultFound:
+            response = {
+                "message": "Invalid Request."
+            }
+            return response, 405
 
         f = tempfile.NamedTemporaryFile(mode='w+')
 
@@ -234,7 +284,7 @@ class JobExecutionApi(Resource):
                 url=job_query.repo_url,
                 execution_id=execution_id,
                 organization_id=organization_id,
-                server=args.server
+                server=server
             )
                 
         finally:
@@ -257,29 +307,34 @@ class JobStatusApi(Resource):
         parser.add_argument('status', required=True) 
         args = parser.parse_args()
 
-        # Get Cluster / Job table in the Database
-        database.session.query(JobExecution).filter_by(execution_id=execution_id).update({'status': args.status}) 
-
-        # Commit Updated Execution status to Database
-        database.session.commit()
+        try:
+            # Get Cluster / Job table in the Database
+            database.session.query(JobExecution).filter_by(execution_id=execution_id).update({'status': args.status}) 
+    
+            # Commit Updated Execution status to Database
+            database.session.commit()
+        except NoResultFound:
+            response = {
+                "message": "Execution does not exist."
+            }
+            return response, 404
 
         if args.status in ['failed', 'succeeded', 'aborted']:
-
-            # Query Job Executions Table
-            job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
-
-            # Query Jobs Table
-            job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
-
-            # Query Clusters table
-            cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
-
-            # Query Organizations table
-            organization_query = Organization.query.filter(Organization.id == job_execution_query.organization_id).one()
-
-            f = tempfile.NamedTemporaryFile(mode='w+')
-    
             try:
+                # Query Job Executions Table
+                job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+
+                # Query Jobs Table
+                job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
+    
+                # Query Clusters table
+                cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
+    
+                # Query Organizations table
+                organization_query = Organization.query.filter(Organization.id == job_execution_query.organization_id).one()
+
+                f = tempfile.NamedTemporaryFile(mode='w+')
+    
                 # Write CA Certificate to Temporary File
                 ca = base64.b64decode(cluster_query.certificate_authority).decode()
                 f.write(ca)
@@ -298,6 +353,12 @@ class JobStatusApi(Resource):
                     organization_id=organization_query.id
                 )
 
+            except NoResultFound:
+                response = {
+                    "message": "Invalid Request."
+                }
+                return response, 405
+            
             finally:
                 f.close()
 
@@ -313,24 +374,35 @@ class JobStatusApi(Resource):
     
     def delete(self, execution_id: str):
 
-        # Drop Job Row
-        row = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
-        database.session.delete(row)
-        database.session.commit() 
-    
+        try:
+            # Drop Job Row
+            row = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+            database.session.delete(row)
+            database.session.commit() 
+        except NoResultFound:
+            response = {
+                "message": "Execution does not exist."
+            }
+            return response, 404
+        
         return 200
 
     def get(self, execution_id: str):
-
-        # Query Job Executions Table
-        job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+        try:
+            # Query Job Executions Table
+            job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+            
+            # Query Jobs Table
+            job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
+    
+            # Get Organization Id
+            organization_id = Organization.query.filter(Organization.id == job_execution_query.organization_id).one().id
+        except NoResultFound:
+            response = {
+                "message": "Execution does not exist."
+            }
+            return response, 405    
         
-        # Query Jobs Table
-        job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
-
-        # Get Organization Id
-        organization_id = Organization.query.filter(Organization.id == job_execution_query.organization_id).one().id
-
         response = {
             "id": job_execution_query.id,
             "job_name": job_query.id,
@@ -338,5 +410,5 @@ class JobStatusApi(Resource):
             "organization_name": organization_id,
             "status": job_execution_query.status
         }
-    
+  
         return response, 200

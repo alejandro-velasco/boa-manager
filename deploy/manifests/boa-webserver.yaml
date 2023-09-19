@@ -95,6 +95,13 @@ data:
             listen 8081;
             server_name _;
         
+            location ~ ^/(ui|static) {
+                proxy_pass http://dev-ui.boa:5000;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
             location /api {
                 proxy_pass http://boa-manager.boa:5000;
                 proxy_set_header X-Real-IP $remote_addr;
@@ -102,9 +109,17 @@ data:
                 proxy_set_header X-Forwarded-Proto $scheme;
             }
 
+            # API Documentation Service Enpoint
+            location /docs/ui {
+                proxy_pass http://boa-api-documentation.boa:8080/ui;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
 
-            location /docs {
-                proxy_pass http://boa-api-documentation.boa:8080;
+            # OpenAPI JSON File endpoint for Documenation Service
+            location /openapi.json {
+                proxy_pass http://boa-api-documentation.boa:8080/openapi.json;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_set_header X-Forwarded-Proto $scheme;
