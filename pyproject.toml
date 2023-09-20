@@ -24,3 +24,8 @@ dynamic = ["dependencies"]
 "Homepage" = "https://github.com/alejandro-velasco/boa-manager"
 "Bug Tracker" = "https://github.com/alejandro-velasco/boa-manager/issues"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+boa_manager = ["**/*.js", "*.js", "**/*.html", "**/*.css", "**/*.json", "**./*.png", "*.png"]

@@ -1,0 +1,1151 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Swagger Boa Manager - OpenAPI 3.0",
+    "description": "This is a Boa Manager server based on the OpenAPI 3.0 specification.  ",
+    "license": {
+      "name": "MIT License",
+      "url": "https://mit-license.org/"
+    },
+    "version": "1.0.11"
+  },
+  "externalDocs": {
+    "description": "Boa Manager Git Hub",
+    "url": "https://github.com/alejandro-velasco/boa-manager"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Organization",
+      "description": "Manage Organizations",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://github.com/alejandro-velasco/boa-manager"
+      }
+    },
+    {
+      "name": "Job",
+      "description": "Manage Jobs",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://github.com/alejandro-velasco/boa-manager"
+      }
+    },
+    {
+      "name": "Job Status",
+      "description": "Manage Job Statuses",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://github.com/alejandro-velasco/boa-manager"
+      }
+    },
+    {
+      "name": "Job Execution",
+      "description": "Manage Job Executions",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://github.com/alejandro-velasco/boa-manager"
+      }
+    },
+    {
+      "name": "Cluster",
+      "description": "Manage Cluster Configurations",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://github.com/alejandro-velasco/boa-manager"
+      }
+    }
+  ],
+  "paths": {
+    "/api/organizations": {
+      "get": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "List Organizations",
+        "description": "Get a list existing organizations",
+        "operationId": "list_organizations",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Organization"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.organization_controller"
+      }
+    },
+    "/api/organization/{organizationName}": {
+      "get": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "Get an Organization",
+        "description": "Get an existing organization by Name",
+        "operationId": "get_organization",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization to get",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.organization_controller"
+      },
+      "post": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "Add a new Organization",
+        "description": "Add a new Organization",
+        "operationId": "add_organization",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization to get",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Create a new organization",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Organization"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.organization_controller"
+      },
+      "put": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "Update Organization",
+        "description": "Update a Organization",
+        "operationId": "update_organization",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization to update",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update organization",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Organization"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.organization_controller"
+      },
+      "delete": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "Delete an Organization",
+        "description": "Delete an existing Organization by Name",
+        "operationId": "delete_organization",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of Organization to delete",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.organization_controller"
+      }
+    },
+    "/api/jobs/{organizationName}": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "List Jobs under an Organization",
+        "description": "Get a list existing organizations",
+        "operationId": "list_jobs",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization that owns the jobs",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_controller"
+      }
+    },
+    "/api/job/{organizationName}/{jobName}": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Get an job",
+        "description": "Get an existing job by Name",
+        "operationId": "get_job",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization that owns the job",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "Name of job",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_controller"
+      },
+      "post": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Add a new Job",
+        "description": "Add a new Job",
+        "operationId": "add_job",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of Organization that owns the Job",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "Name of Job",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Create a new Job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Job"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_controller"
+      },
+      "delete": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Delete a Job",
+        "description": "Delete an existing Job by Name",
+        "operationId": "delete_job",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization that owns the job",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "Name of job to execute",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_controller"
+      }
+    },
+    "/api/job/{organizationName}/{jobName}/statuses": {
+      "get": {
+        "tags": [
+          "Job Status"
+        ],
+        "summary": "List Statuses of a Job",
+        "description": "Get a List of Job Statuses",
+        "operationId": "list_job_statuses",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization that owns the job",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "Name of job to execute",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobStatus"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Execution ID supplied"
+          },
+          "404": {
+            "description": "Execution ID not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_status_controller"
+      }
+    },
+    "/api/job/status/{executionId}": {
+      "get": {
+        "tags": [
+          "Job Status"
+        ],
+        "summary": "Get a Job Status",
+        "description": "Get an existing job status by execution id",
+        "operationId": "get_job_status",
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "Execution id belonging to a job status",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Execution ID supplied"
+          },
+          "404": {
+            "description": "Execution ID not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_status_controller"
+      },
+      "put": {
+        "tags": [
+          "Job Status"
+        ],
+        "summary": "Update a Job Status",
+        "description": "Update an existing job status by execution id",
+        "operationId": "update_job_status",
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "Execution id belonging to a job status",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existent Job Status",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobStatus"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Job Status not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_status_controller"
+      },
+      "delete": {
+        "tags": [
+          "Job Status"
+        ],
+        "summary": "Delete a Job Status",
+        "description": "Delete an existing Job Statu",
+        "operationId": "delete_job_status",
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "Execution id belonging to a job status",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_status_controller"
+      }
+    },
+    "/api/job/{organizationName}/{jobName}/execute": {
+      "post": {
+        "tags": [
+          "Job Execution"
+        ],
+        "summary": "Runs an execution of a job",
+        "description": "Run an execution of the job",
+        "operationId": "run_execution",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "path",
+            "description": "Name of organization that owns the job",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "Name of job to execute",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatus"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.job_execution_controller"
+      }
+    },
+    "/api/clusters": {
+      "get": {
+        "tags": [
+          "Cluster"
+        ],
+        "summary": "List Cluster Configurations",
+        "description": "List existing cluster configurations",
+        "operationId": "list_clusters",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClusterRedacted"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Cluster Name supplied"
+          },
+          "404": {
+            "description": "Cluster configuration not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.cluster_controller"
+      }
+    },
+    "/api/cluster/{clusterName}": {
+      "get": {
+        "tags": [
+          "Cluster"
+        ],
+        "summary": "Get a Cluster Configuration",
+        "description": "Get an existing cluster configuration by name",
+        "operationId": "get_cluster",
+        "parameters": [
+          {
+            "name": "clusterName",
+            "in": "path",
+            "description": "Name of Cluster Configuration",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterRedacted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Cluster Name supplied"
+          },
+          "404": {
+            "description": "Cluster configuration not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.cluster_controller"
+      },
+      "put": {
+        "tags": [
+          "Cluster"
+        ],
+        "summary": "Update a Cluster Configuration",
+        "description": "Update an existing Cluster configuration by name",
+        "operationId": "update_cluster",
+        "parameters": [
+          {
+            "name": "clusterName",
+            "in": "path",
+            "description": "Name of Cluster configuration",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existent cluster configuration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cluster"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cluster"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Cluster configuration not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.cluster_controller"
+      },
+      "post": {
+        "tags": [
+          "Cluster"
+        ],
+        "summary": "Create a Cluster Configuration",
+        "description": "Create a Cluster configuration by name",
+        "operationId": "create_cluster",
+        "parameters": [
+          {
+            "name": "clusterName",
+            "in": "path",
+            "description": "Name of Cluster configuration",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Create a cluster configuration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cluster"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cluster"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Cluster configuration not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.cluster_controller"
+      },
+      "delete": {
+        "tags": [
+          "Cluster"
+        ],
+        "summary": "Delete a Cluster Configuration",
+        "description": "Delete an existing Clusteer configuration by name",
+        "operationId": "delete_cluster",
+        "parameters": [
+          {
+            "name": "clusterName",
+            "in": "path",
+            "description": "Name of Cluster configuration",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid Name supplied"
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "x-openapi-router-controller": "swagger_server.controllers.cluster_controller"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "readOnly": true,
+            "example": "my-organization"
+          }
+        },
+        "example": {
+          "name": "my-organization",
+          "description": "My Organization",
+          "id": 0
+        }
+      },
+      "Cluster": {
+        "required": [
+          "server_url"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "readOnly": true,
+            "example": "my-cluster"
+          },
+          "server_url": {
+            "type": "string",
+            "description": "Server URL of the Kubernetes API Server Target"
+          },
+          "certificate_authority": {
+            "type": "string",
+            "description": "Base64-Encoded string of the Kubernetes CA Certificate of Kubernetes API Server Target"
+          },
+          "token": {
+            "type": "string",
+            "description": "Bearer token of Kubernetes Service Account for API Server access to target Cluster"
+          }
+        },
+        "example": {
+          "certificate_authority": "certificate_authority",
+          "name": "my-cluster",
+          "id": 0,
+          "server_url": "server_url",
+          "token": "token"
+        }
+      },
+      "ClusterRedacted": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "my-cluster"
+          },
+          "server_url": {
+            "type": "string",
+            "description": "Server URL of the Kubernetes API Server Target"
+          },
+          "certificate_authority": {
+            "type": "string",
+            "description": "Base64-Encoded string of the Kubernetes CA Certificate of Kubernetes API Server Target"
+          }
+        },
+        "example": {
+          "certificate_authority": "certificate_authority",
+          "name": "my-cluster",
+          "id": 0,
+          "server_url": "server_url"
+        }
+      },
+      "Job": {
+        "required": [
+          "cluster_name",
+          "image",
+          "repo_url"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "job_name": {
+            "type": "string",
+            "description": "Name of job",
+            "readOnly": true
+          },
+          "organization_name": {
+            "type": "string",
+            "description": "Name of organization",
+            "readOnly": true
+          },
+          "cluster_name": {
+            "type": "string",
+            "description": "Name of cluster configuration"
+          },
+          "repo_url": {
+            "type": "string",
+            "description": "URL of git repository containing Boa Job",
+            "example": "https://github.com/project/repo.git"
+          },
+          "image": {
+            "type": "string",
+            "description": "Docker image containing boa-client CLI",
+            "example": "boa-client:latest"
+          },
+          "branch": {
+            "type": "string",
+            "description": "Branch to pull from Git repository",
+            "example": "main"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "File path to Boa Job file",
+            "example": ".ci/boa.yaml"
+          },
+          "log_level": {
+            "type": "string",
+            "description": "Log Level to set for Boa Job",
+            "example": "INFO",
+            "enum": [
+              "INFO",
+              "WARN",
+              "DEBUG"
+            ]
+          }
+        },
+        "example": {
+          "cluster_name": "cluster_name",
+          "repo_url": "https://github.com/project/repo.git",
+          "image": "boa-client:latest",
+          "file_path": ".ci/boa.yaml",
+          "job_name": "job_name",
+          "log_level": "INFO",
+          "id": 0,
+          "organization_name": "organization_name",
+          "branch": "main"
+        }
+      },
+      "JobStatus": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "job_name": {
+            "type": "string",
+            "description": "name of job",
+            "readOnly": true,
+            "example": "my-job"
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "execution Id of the job",
+            "readOnly": true
+          },
+          "organization_name": {
+            "type": "string",
+            "description": "organization id of organization owning the job",
+            "readOnly": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Job Status",
+            "enum": [
+              "running",
+              "suceeded",
+              "failed"
+            ]
+          }
+        },
+        "example": {
+          "execution_id": "execution_id",
+          "job_name": "my-job",
+          "id": 0,
+          "organization_name": "organization_name",
+          "status": "running"
+        }
+      }
+    }
+  }
+}

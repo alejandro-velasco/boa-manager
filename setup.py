@@ -6,6 +6,6 @@ with open(f"requirements.txt") as f:
 setup(
     install_requires=requirements,
     entry_points = {
-        'console_scripts': ['boa-manager=boa_manager.boa_manager:entrypoint']
+        'console_scripts': ['boa-manager=boa_manager.entrypoint:entrypoint']
     }
 )

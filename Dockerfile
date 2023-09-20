@@ -25,15 +25,20 @@ RUN set -ex &&                               \
 # installing pip dependencies
 RUN set -ex &&                \
     python3.11 -m pip install \
+        pytailwindcss         \
         build                 
 
 # Build pip package
-RUN set -ex && \
+RUN set -ex                                          && \
+    tailwindcss                                         \
+        -i ./src/boa_manager/static/src/main.css        \  
+        -o .src/boa_manager/src/static/dist/main.css    \
+        --minify                                     && \
     python3.11 -m build
 
 # Run pytest unit tests
-RUN set -ex &&                                 \
-    python3.11 -m pip install                  \
+RUN set -ex &&                                  \
+    python3.11 -m pip install                   \
         dist/boa_manager-0.0.1-py3-none-any.whl
 
 #### Start second stage
@@ -41,7 +46,7 @@ RUN set -ex &&                                 \
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 
 # Copy artifacts from first stage
-COPY --from=boa-manager-builder /src/dist /dist
+COPY --from=boa-manager-builder /src/dist /app/dist
 COPY entrypoint.sh /entrypoint.sh
 
 # Install python packages and pip dependencies
@@ -53,25 +58,26 @@ RUN set -ex &&                \
     python3.11 -m pip install \
         virtualenv
 
-# Create boa-manager user and set permissions
+# Create boa-manager user, app directory, and set permissions
 RUN set -ex                                                                          && \
     groupadd --gid 1000 boa-manager                                                  && \
     useradd --uid 1000 --gid boa-manager --shell /bin/bash --create-home boa-manager && \
     chown 1000:1000 -R                                                                  \
+        /app                                                                            \
         /entrypoint.sh                                                               && \
     chmod 500                                                                           \
         /entrypoint.sh
 
-# Install boa-manager into python virtual environment 
-RUN set -ex                                     && \
-    python3.11 -m virtualenv /boa-manager       && \
-    source /boa-manager/bin/activate            && \
-    python3.11 -m pip install                      \
-        dist/boa_manager-0.0.1-py3-none-any.whl && \
-    rm -rf /dist                                && \
-    deactivate
-
 USER 1000
+
+# Install boa-manager into python virtual environment 
+RUN set -ex                                          && \
+    python3.11 -m virtualenv /app/boa-manager        && \
+    source /app/boa-manager/bin/activate             && \
+    python3.11 -m pip install                           \
+        /app/dist/boa_manager-0.0.1-py3-none-any.whl && \
+    rm -rf /app/dist                                 && \
+    deactivate
 
 WORKDIR /home/boa-manager
 
