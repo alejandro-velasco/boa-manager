@@ -1,3 +1,3 @@
 #!/bin/sh
-source /boa-manager/bin/activate
+source /app/boa-manager/bin/activate
 boa-manager $@
