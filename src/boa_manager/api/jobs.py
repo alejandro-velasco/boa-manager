@@ -5,6 +5,10 @@ import tempfile
 from flask import request
 from sqlalchemy.exc import NoResultFound
 from flask_restful import reqparse, Resource
+from boa_manager.utils.string_utils import (
+    valid_display_string,
+    valid_docker_image
+)
 from boa_manager.db.database import database
 from boa_manager.db.models.jobs import (
     Job, 
@@ -70,6 +74,13 @@ class JobListApi(Resource):
         return response, 200
 
 class JobApi(Resource):
+    def _validate_request(self, cluster_name: str, image: str, job_name: str):
+        if not (valid_display_string(cluster_name) and
+                valid_display_string(job_name) and
+                valid_docker_image(image)):
+            return False
+        return True
+
     def get(self, organization_name: str, job_name: str):
 
         try:
@@ -109,6 +120,15 @@ class JobApi(Resource):
         parser.add_argument('file_path', required=False)
         parser.add_argument('log_level', required=False)
         args = parser.parse_args()
+
+        if not self._validate_request(image=args.image,
+                                      cluster_name=args.cluster_name,
+                                      job_name=job_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
 
         try:
             # Get Organization Id
@@ -166,6 +186,15 @@ class JobApi(Resource):
         parser.add_argument('file_path', required=False)
         parser.add_argument('log_level', required=False)
         args = parser.parse_args()
+
+        if not self._validate_request(image=args.image,
+                                      cluster_name=args.cluster_name,
+                                      job_name=job_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
 
         try:
             # Get Organization Id
@@ -313,6 +342,7 @@ class JobStatusApi(Resource):
     
             # Commit Updated Execution status to Database
             database.session.commit()
+
         except NoResultFound:
             response = {
                 "message": "Execution does not exist."

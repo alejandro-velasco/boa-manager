@@ -1,5 +1,9 @@
 from flask_restful import reqparse, Resource
 from sqlalchemy.exc import NoResultFound
+from boa_manager.utils.string_utils import (
+    valid_display_string,
+    valid_url
+)
 from boa_manager.db.database import database
 from boa_manager.db.models.clusters import Cluster
 
@@ -23,6 +27,12 @@ class ClusterListApi(Resource):
         return response, 200
 
 class ClusterApi(Resource):
+    def _validate_request(self, cluster_name: str, server_url: str):
+        if not (valid_display_string(cluster_name) and
+                valid_url(server_url)):
+            return False
+        return True
+    
     def get(self, cluster_name: str):
         try:
             # Get Cluster Row
@@ -51,6 +61,14 @@ class ClusterApi(Resource):
         parser.add_argument('certificate_authority')
         parser.add_argument('token')
         args = parser.parse_args()
+
+        if not self._validate_request(server_url=args.server_url,
+                                      cluster_name=cluster_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
 
         try:
             # Create Cluster in the Database
@@ -91,6 +109,13 @@ class ClusterApi(Resource):
         parser.add_argument('token')
         args = parser.parse_args()
 
+        if not self._validate_request(server_url=args.server_url,
+                                      cluster_name=cluster_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
 
         try:
             # Update Cluster Row

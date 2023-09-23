@@ -6,11 +6,13 @@ from sqlalchemy import (
 )
 
 from boa_manager.db.database import Base
+from boa_manager.utils.string_utils import rfc_1123_str
 
 class Job(Base):
     __tablename__ = 'jobs'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
+    rfc_1123_name = Column(String(50), nullable=False)
     repo_url = Column(String(100), nullable=False)
     branch = Column(String(50), nullable=True)
     file_path = Column(String(50), nullable=True)
@@ -30,6 +32,7 @@ class Job(Base):
                  log_level=None):
         
         self.name = name
+        self.rfc_1123_name = rfc_1123_str(name)
         self.organization_id = organization_id
         self.cluster_id = cluster_id
         self.repo_url = repo_url

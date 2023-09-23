@@ -1,5 +1,6 @@
 from flask_restful import reqparse, Resource
 from sqlalchemy.exc import NoResultFound
+from boa_manager.utils.string_utils import valid_display_string
 from boa_manager.db.database import database
 from boa_manager.db.models.organizations import (
     Organization,
@@ -25,6 +26,11 @@ class OrganizationListApi(Resource):
         return response, 200
 
 class OrganizationApi(Resource):
+    def _validate_request(self, organization_name: str):
+        if not valid_display_string(organization_name):
+            return False
+        return True
+
     def get(self, organization_name: str):
 
         try:
@@ -51,6 +57,13 @@ class OrganizationApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('description', required=False, default="")
         args = parser.parse_args()
+
+        if not self._validate_request(organization_name=organization_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
 
         # Create Organization in the Database
         org = Organization(name=organization_name,
