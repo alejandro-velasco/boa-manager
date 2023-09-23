@@ -4,7 +4,7 @@
     <!-- Main Content -->
     <main class="flex-1 p-10">
         <div class="flex border-b border-gray-400">
-            <h2 class="py-4 text-2xl font-opensans font-semibold text-white">
+            <h2 class="py-4 text-2xl font-roboto font-semibold text-white">
                 All Clusters
             </h2>
             <form class="flex items-center justify-center text-white text-align-center font-bold w-12 h-12 my-2 ml-auto transition ease-in-out delay-150 bg-slate-800 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-700 duration-300 rounded-lg shadow-lg overflow-hidden" action="/ui/clusters/create/form">
@@ -18,18 +18,18 @@
                 <a href="/ui/cluster/{{ cluster.name }}">
                     <div class="w-96 h-64 transition ease-in-out delay-150 bg-slate-800 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-700 duration-300 rounded-lg shadow-lg text-ellipsis">
                         <div class="p-8">
-                            <h2 class="border-b border-gray-400 text-2xl font-opensans font-semibold text-white">
+                            <h2 class="border-b border-gray-400 text-2xl font-roboto font-semibold text-white">
                                 {{ cluster.name }}
                             </h2>
-                            <p class="text-slate-300 font-opensans mt-2">Server URL: {{ cluster.server_url }}</p>
-                            <p class="text-slate-300 font-opensans mt-2">Description Placeholder</p>
+                            <p class="text-slate-300 font-roboto mt-2">Server URL: {{ cluster.server_url }}</p>
+                            <p class="text-slate-300 font-roboto mt-2">Description Placeholder</p>
                         </div>
                     </div>
                 </a>
             </div>
             {% endfor %}
             {% else %}
-            <p class="text-slate-300 text-2xl font-opensans mt-2">There are currently no Clusters.</p>
+            <p class="text-slate-300 text-2xl font-roboto mt-2">There are currently no Clusters.</p>
             {% endif %}
         </div>      
     </main>
