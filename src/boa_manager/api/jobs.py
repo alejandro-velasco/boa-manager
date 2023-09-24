@@ -308,7 +308,7 @@ class JobExecutionApi(Resource):
             )
 
             client.create_pod(
-                name=job_name,
+                name=job_query.rfc_1123_name,
                 image=job_query.image,
                 url=job_query.repo_url,
                 execution_id=execution_id,
@@ -378,7 +378,7 @@ class JobStatusApi(Resource):
                 )
 
                 client.delete_pod(
-                    name=job_query.name,
+                    name=job_query.rfc_1123_name,
                     execution_id=execution_id,
                     organization_id=organization_query.id
                 )

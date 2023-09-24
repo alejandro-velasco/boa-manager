@@ -116,11 +116,8 @@ class BoaK8SClient:
     
     def delete_pod(self, name, execution_id, organization_id, namespace='boa'):
         # Delete deployment
-        resp = self.api.delete_namespaced_pod(
-            name=f'org-{organization_id}-job-{name}-{execution_id}',
-            namespace=namespace,
-            body=client.V1DeleteOptions(
-                propagation_policy="Foreground", grace_period_seconds=5
-            )
-        )
+        resp = self.api.delete_namespaced_pod(name=f'org-{organization_id}-job-{name}-{execution_id}',
+                                              namespace=namespace,
+                                              body=client.V1DeleteOptions(propagation_policy="Foreground", 
+                                                                          grace_period_seconds=5))
         logging.info(f"pod `{name}` deleted.")
