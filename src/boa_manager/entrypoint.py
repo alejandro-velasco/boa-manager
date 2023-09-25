@@ -162,7 +162,9 @@ def organization_jobs_dashboard(organization_name: str, job_name: str):
 def organization_jobs_executions(organization_name: str, job_name: str):
     server = request.host_url.rstrip('/')
     executions = requests.get(f"{server}/api/job/{organization_name}/{job_name}/statuses")
-    return render_template("jobs/executions.html", 
+    return render_template("jobs/executions.html",
+                           organization_name=organization_name,
+                           job_name=job_name, 
                            executions=executions.json())
 
 def entrypoint():

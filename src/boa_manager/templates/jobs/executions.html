@@ -1,6 +1,8 @@
 {% if executions|length>0 %}
-  {% for execution in executions %}
-    <tr>
+  {% for execution in executions[::-1] %}
+    <tr onclick="window.location='/ui/job/{{ organization_name }}/{{ job_name }}/{{ execution.execution_id }}';"
+        class="transition ease-in-out delay-100 hover:bg-indigo-700 duration-300"
+    >
       {% if not loop.last %}
       <td class="py-2 px-4 border-b border-gray-400 text-left font-roboto font-semibold text-white">{{execution.execution_id}}</td>
       <td class="py-2 px-4 border-b border-gray-400 text-left">
