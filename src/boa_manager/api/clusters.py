@@ -12,6 +12,7 @@ class ClusterListApi(Resource):
 
         # Get all Clusters
         clusters = Cluster.query.all()
+        database.session.close()
         response = []
 
         for cluster in clusters:
@@ -37,7 +38,8 @@ class ClusterApi(Resource):
         try:
             # Get Cluster Row
             cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
-            
+            database.session.close()
+
         except NoResultFound:
             response = {
                 "message": "Cluster does not exist."
@@ -89,6 +91,7 @@ class ClusterApi(Resource):
             return response, 405 
         
         cluster_query = cluster.query.filter(Cluster.name == cluster_name).one()
+        database.session.close()
 
         response = {
             "id": cluster_query.id,
@@ -124,7 +127,8 @@ class ClusterApi(Resource):
                                                                            "token": args.token}) 
             cluster = Cluster.query.filter(Cluster.name == cluster_name).one()
             database.session.commit()
-        
+            database.session.close()
+
         except NoResultFound:
             response = {
                 "message": "Invalid Request."
@@ -147,6 +151,7 @@ class ClusterApi(Resource):
             row = Cluster.query.filter(Cluster.name == cluster_name).one()
             database.session.delete(row)
             database.session.commit() 
+            database.session.close()
 
         except NoResultFound:
             response = {

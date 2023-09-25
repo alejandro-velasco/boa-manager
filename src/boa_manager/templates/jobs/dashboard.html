@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Main Content -->
+    <main class="flex-1 p-10">
+        <div class="flex border-b border-gray-400">
+            <h2 class="py-4 text-2xl font-roboto font-semibold text-white">
+                {{ organization_name }} - {{ job_name }}
+            </h2>
+        </div>
+        <div class="flex items-left justify-left">
+            <div class="my-8 mx-4 w-2/3 rounded-lg overflow-hidden shadow-lg">
+                <table class="min-w-full">
+                    <thead class="bg-slate-800">
+                        <tr>
+                            <th class="py-2 px-4 border-b border-gray-400 font-roboto font-semibold text-white text-left">Execution ID</th>
+                            <th class="py-2 px-4 border-b border-gray-400 font-roboto font-semibold text-white text-left">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody
+                        hx-get="/ui/job/{{ organization_name }}/{{ job_name }}/executions"
+                        hx-trigger="load, every 2s"
+                        class="bg-slate-800"
+                    >
+                    </tbody>
+                </table>
+            </div>
+        </div>      
+    </main>
+{% endblock content %}

@@ -12,6 +12,7 @@ class OrganizationListApi(Resource):
 
         # Get all Organizations
         organizations = Organization.query.all()
+        database.session.close()
         response = []
 
         for organization in organizations:
@@ -36,6 +37,7 @@ class OrganizationApi(Resource):
         try:
             # Get Organization Id
             organization = Organization.query.filter(Organization.name == organization_name).one()
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Organization does not exist."
@@ -81,6 +83,7 @@ class OrganizationApi(Resource):
         # Commit to Database
         unique_index.create()
         database.session.commit()
+        database.session.close()
 
         response = {
             "id": organization_id,
@@ -99,10 +102,10 @@ class OrganizationApi(Resource):
         try:
             # Update Organization in the Database
             database.session.query(Organization).filter_by(name=organization_name).update({'description': args.description})
-
             database.session.commit()
-
+            database.session.close()
             organization_query = Organization.query.filter(Organization.name == organization_name).one()
+            
 
         except NoResultFound:
             response = {
@@ -125,7 +128,8 @@ class OrganizationApi(Resource):
             row = Organization.query.filter(Organization.name == organization_name).one()
             database.session.delete(row)
             database.session.commit()
-             
+            database.session.close()
+
             # Drop Partial Unique Index
             unique_index = OrganizationUniqueIndex(id=row.id, 
                                                    engine=database.engine)

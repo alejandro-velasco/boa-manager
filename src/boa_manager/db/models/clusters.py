@@ -14,8 +14,8 @@ class Cluster(Base):
     name = Column(String(50), unique=True, nullable=False)
     rfc_1123_name = Column(String(50), unique=True, nullable=False)
     server_url = Column(String(50), unique=False, nullable=False)
-    certificate_authority = Column(Text, unique=False, nullable=False)
-    token = Column(Text, unique=False, nullable=False)
+    certificate_authority = Column(Text, unique=False, nullable=False, default='')
+    token = Column(Text, unique=False, nullable=False, default='')
 
     def __init__(self, name=None, server_url=None, certificate_authority=None, token=None):
         self.name = name

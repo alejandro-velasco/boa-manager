@@ -26,6 +26,7 @@ class JobStatusListApi(Resource):
         job = Job.query.filter(Job.organization_id == organization_id,
                                 Job.name == job_name).one()
         job_statuses = JobExecution.query.filter(JobExecution.job_id == job.id)
+        database.session.close()
         response = []
 
         for status in job_statuses:
@@ -55,6 +56,8 @@ class JobListApi(Resource):
             return response, 404
         
         jobs = Job.query.filter(Job.organization_id == organization_id)
+        database.session.close()
+
         response = []
 
         for job in jobs:
@@ -90,7 +93,7 @@ class JobApi(Resource):
             # Get Job
             job_query = Job.query.filter(Job.name == job_name,
                                          Job.organization_id == organization_id).one()
-    
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Job not found."
@@ -161,7 +164,7 @@ class JobApi(Resource):
 
         job_query = job.query.filter(Job.name == job_name,
                                      Job.organization_id == organization_id).one()
-        
+        database.session.close()
         response = {
             "id": job_query.id,
             "job_name": job_query.name,
@@ -218,6 +221,7 @@ class JobApi(Resource):
 
             job_query = Job.query.filter(Job.name == job_name,
                                          Job.organization_id == organization_id).one()
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Invalid Request."
@@ -247,6 +251,7 @@ class JobApi(Resource):
                                    Job.organization_id == organization_id).one()
             database.session.delete(row)
             database.session.commit() 
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Job not found."
@@ -285,7 +290,6 @@ class JobExecutionApi(Resource):
             database.session.commit()
     
             job_execution_query = job_execution.query.filter(JobExecution.execution_id == execution_id).one()
-
         except NoResultFound:
             response = {
                 "message": "Invalid Request."
@@ -342,7 +346,7 @@ class JobStatusApi(Resource):
     
             # Commit Updated Execution status to Database
             database.session.commit()
-
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Execution does not exist."
@@ -409,6 +413,7 @@ class JobStatusApi(Resource):
             row = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
             database.session.delete(row)
             database.session.commit() 
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Execution does not exist."
