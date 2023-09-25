@@ -1,5 +1,6 @@
 from flask_restful import reqparse, Resource
 from sqlalchemy.exc import NoResultFound
+from boa_manager.utils.string_utils import valid_display_string
 from boa_manager.db.database import database
 from boa_manager.db.models.organizations import (
     Organization,
@@ -11,6 +12,7 @@ class OrganizationListApi(Resource):
 
         # Get all Organizations
         organizations = Organization.query.all()
+        database.session.close()
         response = []
 
         for organization in organizations:
@@ -25,11 +27,17 @@ class OrganizationListApi(Resource):
         return response, 200
 
 class OrganizationApi(Resource):
+    def _validate_request(self, organization_name: str):
+        if not valid_display_string(organization_name):
+            return False
+        return True
+
     def get(self, organization_name: str):
 
         try:
             # Get Organization Id
             organization = Organization.query.filter(Organization.name == organization_name).one()
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Organization does not exist."
@@ -52,6 +60,13 @@ class OrganizationApi(Resource):
         parser.add_argument('description', required=False, default="")
         args = parser.parse_args()
 
+        if not self._validate_request(organization_name=organization_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
+
         # Create Organization in the Database
         org = Organization(name=organization_name,
                            description=args.description)
@@ -68,6 +83,7 @@ class OrganizationApi(Resource):
         # Commit to Database
         unique_index.create()
         database.session.commit()
+        database.session.close()
 
         response = {
             "id": organization_id,
@@ -86,10 +102,10 @@ class OrganizationApi(Resource):
         try:
             # Update Organization in the Database
             database.session.query(Organization).filter_by(name=organization_name).update({'description': args.description})
-
             database.session.commit()
-
+            database.session.close()
             organization_query = Organization.query.filter(Organization.name == organization_name).one()
+            
 
         except NoResultFound:
             response = {
@@ -112,7 +128,8 @@ class OrganizationApi(Resource):
             row = Organization.query.filter(Organization.name == organization_name).one()
             database.session.delete(row)
             database.session.commit()
-             
+            database.session.close()
+
             # Drop Partial Unique Index
             unique_index = OrganizationUniqueIndex(id=row.id, 
                                                    engine=database.engine)

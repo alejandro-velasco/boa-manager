@@ -1,0 +1,25 @@
+{% if executions|length>0 %}
+  {% for execution in executions[::-1] %}
+    <tr onclick="window.location='/ui/job/{{ organization_name }}/{{ job_name }}/{{ execution.execution_id }}';"
+        class="transition ease-in-out hover:bg-indigo-700 duration-300"
+    >
+      {% if not loop.last %}
+      <td class="py-2 px-4 border-b border-gray-400 text-left font-roboto font-semibold text-white">{{execution.execution_id}}</td>
+      <td class="py-2 px-4 border-b border-gray-400 text-left">
+      {% else %}
+      <td class="py-2 px-4 text-left font-roboto font-semibold text-white">{{execution.execution_id}}</td>
+      <td class="py-2 px-4 text-left">
+      {% endif %}     
+        {% if execution.status == 'succeeded' %}
+          <span class="rounded bg-green-400 font-roboto font-semibold text-black py-1 px-3 text-xs font-bold">{{ execution.status }}</span>
+        {% elif execution.status == 'Pending' %}
+          <span class="rounded bg-yellow-400 font-roboto font-semibold text-black py-1 px-3 text-xs font-bold">{{ execution.status }}</span>
+        {% elif execution.status == 'running' %}
+          <span class="rounded bg-indigo-400 font-roboto font-semibold text-black py-1 px-3 text-xs font-bold">{{ execution.status }}</span>            
+        {% else %}
+          <span class="rounded bg-red-400 font-roboto font-semibold text-black py-1 px-3 text-xs font-bold">unknown</span>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+{% endif %}

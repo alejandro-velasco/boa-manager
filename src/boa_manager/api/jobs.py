@@ -5,6 +5,10 @@ import tempfile
 from flask import request
 from sqlalchemy.exc import NoResultFound
 from flask_restful import reqparse, Resource
+from boa_manager.utils.string_utils import (
+    valid_display_string,
+    valid_docker_image
+)
 from boa_manager.db.database import database
 from boa_manager.db.models.jobs import (
     Job, 
@@ -22,6 +26,7 @@ class JobStatusListApi(Resource):
         job = Job.query.filter(Job.organization_id == organization_id,
                                 Job.name == job_name).one()
         job_statuses = JobExecution.query.filter(JobExecution.job_id == job.id)
+        database.session.close()
         response = []
 
         for status in job_statuses:
@@ -51,6 +56,8 @@ class JobListApi(Resource):
             return response, 404
         
         jobs = Job.query.filter(Job.organization_id == organization_id)
+        database.session.close()
+
         response = []
 
         for job in jobs:
@@ -70,6 +77,13 @@ class JobListApi(Resource):
         return response, 200
 
 class JobApi(Resource):
+    def _validate_request(self, cluster_name: str, image: str, job_name: str):
+        if not (valid_display_string(cluster_name) and
+                valid_display_string(job_name) and
+                valid_docker_image(image)):
+            return False
+        return True
+
     def get(self, organization_name: str, job_name: str):
 
         try:
@@ -79,7 +93,7 @@ class JobApi(Resource):
             # Get Job
             job_query = Job.query.filter(Job.name == job_name,
                                          Job.organization_id == organization_id).one()
-    
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Job not found."
@@ -109,6 +123,15 @@ class JobApi(Resource):
         parser.add_argument('file_path', required=False)
         parser.add_argument('log_level', required=False)
         args = parser.parse_args()
+
+        if not self._validate_request(image=args.image,
+                                      cluster_name=args.cluster_name,
+                                      job_name=job_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
 
         try:
             # Get Organization Id
@@ -141,7 +164,7 @@ class JobApi(Resource):
 
         job_query = job.query.filter(Job.name == job_name,
                                      Job.organization_id == organization_id).one()
-        
+        database.session.close()
         response = {
             "id": job_query.id,
             "job_name": job_query.name,
@@ -167,6 +190,15 @@ class JobApi(Resource):
         parser.add_argument('log_level', required=False)
         args = parser.parse_args()
 
+        if not self._validate_request(image=args.image,
+                                      cluster_name=args.cluster_name,
+                                      job_name=job_name):
+            response = {
+                "message": "Invalid Request."
+            }
+
+            return response, 405
+
         try:
             # Get Organization Id
             organization_id = Organization.query.filter(Organization.name == organization_name).one().id
@@ -189,6 +221,7 @@ class JobApi(Resource):
 
             job_query = Job.query.filter(Job.name == job_name,
                                          Job.organization_id == organization_id).one()
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Invalid Request."
@@ -218,6 +251,7 @@ class JobApi(Resource):
                                    Job.organization_id == organization_id).one()
             database.session.delete(row)
             database.session.commit() 
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Job not found."
@@ -256,7 +290,6 @@ class JobExecutionApi(Resource):
             database.session.commit()
     
             job_execution_query = job_execution.query.filter(JobExecution.execution_id == execution_id).one()
-
         except NoResultFound:
             response = {
                 "message": "Invalid Request."
@@ -279,7 +312,7 @@ class JobExecutionApi(Resource):
             )
 
             client.create_pod(
-                name=job_name,
+                name=job_query.rfc_1123_name,
                 image=job_query.image,
                 url=job_query.repo_url,
                 execution_id=execution_id,
@@ -313,6 +346,7 @@ class JobStatusApi(Resource):
     
             # Commit Updated Execution status to Database
             database.session.commit()
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Execution does not exist."
@@ -348,7 +382,7 @@ class JobStatusApi(Resource):
                 )
 
                 client.delete_pod(
-                    name=job_query.name,
+                    name=job_query.rfc_1123_name,
                     execution_id=execution_id,
                     organization_id=organization_query.id
                 )
@@ -379,6 +413,7 @@ class JobStatusApi(Resource):
             row = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
             database.session.delete(row)
             database.session.commit() 
+            database.session.close()
         except NoResultFound:
             response = {
                 "message": "Execution does not exist."
