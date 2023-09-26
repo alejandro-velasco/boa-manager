@@ -29,11 +29,14 @@ RUN set -ex &&                \
         build                 
 
 # Build pip package
-RUN set -ex                                          && \
-    tailwindcss                                         \
-        -i ./src/boa_manager/static/src/main.css        \  
-        -o .src/boa_manager/src/static/dist/main.css    \
-        --minify                                     && \
+RUN set -ex                       && \
+    pushd `pwd`                   && \
+    cd src/boa_manager            && \
+    tailwindcss                      \
+        -i ./static/src/main.css     \  
+        -o ./static/dist/main.css    \
+        --minify                  && \
+    popd                          && \
     python3.11 -m build
 
 # Run pytest unit tests

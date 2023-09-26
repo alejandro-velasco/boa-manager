@@ -353,20 +353,20 @@ class JobStatusApi(Resource):
             }
             return response, 404
 
+        # Query Job Executions Table
+        job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
+        
+        # Query Jobs Table
+        job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
+        
+        # Query Clusters table
+        cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
+        
+        # Query Organizations table
+        organization_query = Organization.query.filter(Organization.id == job_execution_query.organization_id).one()
+
         if args.status in ['failed', 'succeeded', 'aborted']:
             try:
-                # Query Job Executions Table
-                job_execution_query = JobExecution.query.filter(JobExecution.execution_id == execution_id).one()
-
-                # Query Jobs Table
-                job_query = Job.query.filter(Job.id == job_execution_query.job_id).one()
-    
-                # Query Clusters table
-                cluster_query = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
-    
-                # Query Organizations table
-                organization_query = Organization.query.filter(Organization.id == job_execution_query.organization_id).one()
-
                 f = tempfile.NamedTemporaryFile(mode='w+')
     
                 # Write CA Certificate to Temporary File
