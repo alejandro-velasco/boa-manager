@@ -154,8 +154,11 @@ def organization_jobs_create(organization_name: str):
 
 @app.route("/ui/job/<organization_name>/<job_name>/dashboard")
 def organization_jobs_dashboard(organization_name: str, job_name: str):
+    server = request.host_url.rstrip('/')
+    job = requests.get(f"{server}/api/job/{organization_name}/{job_name}")
     return render_template("jobs/dashboard.html", 
                            job_name=job_name,
+                           job=job.json(),
                            organization_name=organization_name)
 
 @app.route("/ui/job/<organization_name>/<job_name>/executions")
@@ -164,7 +167,7 @@ def organization_jobs_executions(organization_name: str, job_name: str):
     executions = requests.get(f"{server}/api/job/{organization_name}/{job_name}/statuses")
     return render_template("jobs/executions.html",
                            organization_name=organization_name,
-                           job_name=job_name, 
+                           job_name=job_name,
                            executions=executions.json())
 
 def entrypoint():

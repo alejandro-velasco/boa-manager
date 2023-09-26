@@ -93,6 +93,8 @@ class JobApi(Resource):
             # Get Job
             job_query = Job.query.filter(Job.name == job_name,
                                          Job.organization_id == organization_id).one()
+            # Get Cluster Id        
+            cluster = Cluster.query.filter(Cluster.id == job_query.cluster_id).one()
             database.session.close()
         except NoResultFound:
             response = {
@@ -103,6 +105,7 @@ class JobApi(Resource):
         response = {
             "id": job_query.id,
             "job_name": job_query.name,
+            "cluster_name": cluster.name,
             "organization_name": organization_name,
             "repo_url": job_query.repo_url,
             "branch": job_query.branch,

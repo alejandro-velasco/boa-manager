@@ -15,8 +15,8 @@
             </button>
         </div>
         <div class="flex items-left justify-left">
-            <div class="my-8 mr-4 w-2/3 rounded-lg overflow-hidden shadow-lg">
-                <table class="min-w-full">
+            <div class="my-8 mr-4 w-2/3">
+                <table class="min-w-full rounded-lg overflow-hidden shadow-lg">
                     <thead class="bg-slate-800">
                         <tr>
                             <th class="py-2 px-4 border-b border-gray-400 font-roboto font-semibold text-white text-left">Execution ID</th>
@@ -31,6 +31,40 @@
                     </tbody>
                 </table>
             </div>
-        </div>      
+            <div class="my-8 mx-4 w-5/6 h-5/6 bg-slate-800 rounded-lg shadow-lg">
+                <form method="post" id="job-create" action="/ui/jobs/{{ organization_name }}/update">
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-roboto font-semibold" for="job-name">Name:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="job-name" name="job-name" value="{{ job.job_name }}" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-roboto font-semibold" for="cluster-name">Cluster:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="cluster-name" name="cluster-name" value="{{ job.cluster_name }}" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-roboto font-semibold" for="repo-url">Repository URL:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="repo-url" name="repo-url" value="{{ job.repo_url }}" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-roboto font-semibold" for="branch">Branch:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="branch" name="branch" value="{{ job.branch }}">
+                    </div><div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-roboto font-semibold" for="image">Container Image:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="image" name="image" value="{{ job.image }}" required>
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-roboto font-semibold" for="file-path">File Path:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="file-path" name="file-path" value="{{ job.file_path }}">
+                    </div>
+                    <div class="mx-4 my-8 flex items-left justify-left">
+                        <label class="mx-4 text-white block font-roboto font-semibold" for="log-level">Log Level:</label>
+                        <input class="w-2/3 p-2 rounded bg-slate-800 text-white outline-none ring border-blue-500" type="text" id="log-level" name="log-level" value="{{ job.log_level }}">
+                    </div>
+                    <div class="bg-gray-900 mx-4 my-8 flex items-center justify-center text-white text-align-center font-bold w-36 h-12 my-2 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-700 duration-300 rounded-lg shadow-lg overflow-hidden">
+                        <button class="mx-4" type="submit">Apply</button>
+                    </div>
+                </form>
+            </div>            
+        </div>
     </main>
 {% endblock content %}
